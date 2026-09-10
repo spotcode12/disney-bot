@@ -33,8 +33,17 @@
             color: var(--texto);
             font-family: Arial, Helvetica, sans-serif;
             background:
-                radial-gradient(circle at 50% 0%, rgba(229, 9, 20, 0.16), transparent 35%),
-                linear-gradient(145deg, #050505, #121212 55%, #080808);
+                radial-gradient(
+                    circle at 50% 0%,
+                    rgba(229, 9, 20, 0.16),
+                    transparent 35%
+                ),
+                linear-gradient(
+                    145deg,
+                    #050505,
+                    #121212 55%,
+                    #080808
+                );
             overflow-x: hidden;
         }
 
@@ -89,7 +98,11 @@
             align-items: center;
             justify-content: center;
             border-radius: 20px;
-            background: linear-gradient(145deg, var(--rojo), var(--rojo-oscuro));
+            background: linear-gradient(
+                145deg,
+                var(--rojo),
+                var(--rojo-oscuro)
+            );
             box-shadow: 0 8px 25px rgba(229, 9, 20, 0.25);
             font-size: 32px;
         }
@@ -140,7 +153,11 @@
             margin-top: 20px;
             border: none;
             border-radius: 11px;
-            background: linear-gradient(135deg, var(--rojo), var(--rojo-oscuro));
+            background: linear-gradient(
+                135deg,
+                var(--rojo),
+                var(--rojo-oscuro)
+            );
             color: #ffffff;
             font-size: 14px;
             font-weight: 700;
@@ -319,7 +336,7 @@
             <!-- CÓDIGO -->
             <div id="codigo"></div>
 
-            <!-- NUEVO CÓDIGO -->
+            <!-- RECARGAR PÁGINA -->
             <button
                 id="nuevoCodigo"
                 onclick="solicitarNuevoCodigo()"
@@ -334,7 +351,6 @@
         </div>
 
     </div>
-
 
     <script>
 
@@ -510,73 +526,11 @@
 
 
         // ========================================================
-        // SOLICITAR NUEVO CÓDIGO
+        // RECARGAR PÁGINA PARA INTENTAR NUEVAMENTE
         // ========================================================
 
-        async function solicitarNuevoCodigo() {
-
-            const nombre =
-                document.getElementById("nombre").value.trim();
-
-            const pin =
-                document.getElementById("pin").value.trim();
-
-            const resultado =
-                document.getElementById("resultado");
-
-            const boton =
-                document.getElementById("nuevoCodigo");
-
-            const codigo =
-                document.getElementById("codigo");
-
-            boton.disabled = true;
-            codigo.style.display = "none";
-
-            resultado.textContent =
-                "⏳ Esperando nuevo código...";
-
-            try {
-
-                const respuesta =
-                    await fetch("/solicitar-nuevo-codigo", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            nombre: nombre,
-                            pin: pin
-                        })
-                    });
-
-                const datos = await respuesta.json();
-
-                if (datos.ok) {
-
-                    resultado.textContent =
-                        "✅ Nuevo código encontrado";
-
-                    codigo.textContent =
-                        datos.codigo;
-
-                    codigo.style.display = "block";
-
-                } else {
-
-                    resultado.textContent =
-                        "❌ " + datos.mensaje;
-                }
-
-            } catch (error) {
-
-                console.error(error);
-
-                resultado.textContent =
-                    "❌ Error de conexión.";
-            }
-
-            boton.disabled = false;
+        function solicitarNuevoCodigo() {
+            window.location.reload();
         }
 
     </script>
