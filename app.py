@@ -211,6 +211,31 @@ def solicitar_codigo():
         f"Cuenta: {correo_cuenta}"
     )
 
+    # =====================================================
+    # VERIFICAR LÍMITE DIARIO DE SOLICITUDES
+    # =====================================================
+
+    estado = obtener_estado_solicitudes(
+        cuenta_id,
+        nombre_perfil
+    )
+
+    if not estado["permitido"]:
+
+        return jsonify({
+            "ok": False,
+            "mensaje": (
+                "Has alcanzado el límite de 3 códigos "
+                "por hoy. Intenta nuevamente mañana."
+            ),
+            "solicitudes": estado["solicitudes"],
+            "limite": estado["limite"]
+        }), 429
+
+    # =====================================================
+    # OBTENER CÓDIGO DESDE EL CORREO
+    # =====================================================
+
     codigo = obtener_codigo_disney(
         correo_cuenta
     )
@@ -227,6 +252,15 @@ def solicitar_codigo():
             "mensaje": "No se encontró un código."
         }), 404
 
+    # =====================================================
+    # REGISTRAR SOLICITUD EXITOSA
+    # =====================================================
+
+    registrar_solicitud(
+        cuenta_id,
+        nombre_perfil
+    )
+
     print(
         f"🔐 Código obtenido para "
         f"{correo_cuenta}: {codigo}"
@@ -234,7 +268,9 @@ def solicitar_codigo():
 
     return jsonify({
         "ok": True,
-        "codigo": codigo
+        "codigo": codigo,
+        "solicitudes": estado["solicitudes"] + 1,
+        "limite": estado["limite"]
     })
 
 
