@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Administración Disney+</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            margin: 0;
+            padding: 30px 15px;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 500px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .tarjeta {
+            background: #1d1d1d;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 8px;
+            background: #0063e5;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .editar {
+            background: #555;
+        }
+
+        .eliminar {
+            background: #b00020;
+        }
+
+        .cuenta {
+            background: #292929;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .acciones button {
+            flex: 1;
+            margin-top: 0;
+        }
+
+        #resultado {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .estado {
+            color: #bbb;
+            margin-top: 5px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="contenedor">
+
+    <h1>⚙️ Administración</h1>
+
+
+    <!-- =============================== -->
+    <!-- NUEVA CUENTA -->
+    <!-- =============================== -->
+
+    <div class="tarjeta">
+
+        <h2>📧 Nueva cuenta</h2>
+
+        <input
+            type="text"
+            id="nombre"
+            placeholder="Nombre de la cuenta"
+            autocomplete="off"
+        >
+
+        <input
+            type="email"
+            id="correo"
+            placeholder="Correo de la cuenta"
+            autocomplete="off"
+        >
+
+        <button onclick="agregarCuenta()">
+            AGREGAR CUENTA
+        </button>
+
+        <div id="resultado"></div>
+
+    </div>
+
+
+    <!-- =============================== -->
+    <!-- CUENTAS -->
+    <!-- =============================== -->
+
+    <div class="tarjeta">
+
+        <h2>📋 Cuentas registradas</h2>
+
+        <div id="cuentas">
+            ⏳ Cargando...
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+// =====================================================
+// CARGAR CUENTAS
+// =====================================================
+
+async function cargarCuentas() {
+
+    const contenedor =
+        document.getElementById("cuentas");
+
+
+    try {
+
+        const respuesta =
+            await fetch("/admin/cuentas");
+
+
+        if (!respuesta.ok) {
+
+            throw new Error(
+                "HTTP " + respuesta.status
+            );
+
+        }
+
+
+        const datos =
+            await respuesta.json();
+
+
+        console.log(
+            "📋 Respuesta cuentas:",
+            datos
+        );
+
+
+        if (!datos.ok) {
+
+            contenedor.textContent =
+                "❌ No se pudieron cargar las cuentas.";
+
+            return;
+        }
+
+
+        if (
+            !Array.isArray(
+                datos.cuentas
+            )
+        ) {
+
+            throw new Error(
+                "La respuesta no contiene una lista de cuentas."
+            );
+
+        }
+
+
+        if (
+            datos.cuentas.length === 0
+        ) {
+
+            contenedor.textContent =
+                "No hay cuentas registradas.";
+
+            return;
+        }
+
+
+        contenedor.innerHTML = "";
+
+
+        datos.cuentas.forEach(
+            cuenta => {
+
+                const div =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                div.className =
+                    "cuenta";
+
+
+                div.innerHTML = `
+
+                    <strong>
+                        ${escapeHtml(cuenta.nombre)}
+                    </strong>
+
+                    <br>
+
+                    📧 ${escapeHtml(cuenta.correo)}
+
+                    <div class="estado">
+                        Estado: ${escapeHtml(cuenta.estado)}
+                    </div>
+
+
+                    <div class="acciones">
+
+                        <button
+                            onclick="administrarCuenta(${cuenta.id})"
+                        >
+                            👤 PERFILES
+                        </button>
+
+
+                        <button
+                            class="editar"
+                            onclick="editarCuenta(
+                                ${cuenta.id},
+                                '${escapeHtml(cuenta.nombre)}'
+                            )"
+                        >
+                            ✏️ EDITAR
+                        </button>
+
+
+                        <button
+                            class="eliminar"
+                            onclick="eliminarCuenta(
+                                ${cuenta.id}
+                            )"
+                        >
+                            🗑️
+                        </button>
+
+                    </div>
+
+                `;
+
+
+                contenedor.appendChild(
+                    div
+                );
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Error cargando cuentas:",
+            error
+        );
+
+
+        contenedor.textContent =
+            "❌ Error de conexión.";
+
+    }
+
+}
+
+
+// =====================================================
+// ADMINISTRAR CUENTA
+// =====================================================
+
+function administrarCuenta(id) {
+
+    window.location.href =
+        "/admin/cuenta/" + id;
+
+}
+
+
+// =====================================================
+// AGREGAR CUENTA
+// =====================================================
+
+async function agregarCuenta() {
+
+    const nombre =
+        document.getElementById(
+            "nombre"
+        ).value.trim();
+
+
+    const correo =
+        document.getElementById(
+            "correo"
+        ).value.trim();
+
+
+    const resultado =
+        document.getElementById(
+            "resultado"
+        );
+
+
+    if (!nombre || !correo) {
+
+        resultado.textContent =
+            "❌ Completa todos los campos.";
+
+        return;
+    }
+
+
+    resultado.textContent =
+        "⏳ Guardando...";
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/admin/agregar-cuenta",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        correo: correo
+                    })
+                }
+            );
+
+
+        const datos =
+            await respuesta.json();
+
+
+        if (datos.ok) {
+
+            resultado.textContent =
+                "✅ Cuenta agregada correctamente.";
+
+
+            document.getElementById(
+                "nombre"
+            ).value = "";
+
+
+            document.getElementById(
+                "correo"
+            ).value = "";
+
+
+            cargarCuentas();
+
+        } else {
+
+            resultado.textContent =
+                "❌ " + datos.mensaje;
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Error agregando cuenta:",
+            error
+        );
+
+
+        resultado.textContent =
+            "❌ Error de conexión.";
+
+    }
+
+}
+
+
+// =====================================================
+// EDITAR NOMBRE DE CUENTA
+// =====================================================
+
+async function editarCuenta(
+    id,
+    nombreActual
+) {
+
+    const nuevoNombre =
+        prompt(
+            "Nuevo nombre de la cuenta:",
+            nombreActual
+        );
+
+
+    if (nuevoNombre === null) {
+        return;
+    }
+
+
+    const nombre =
+        nuevoNombre.trim();
+
+
+    if (!nombre) {
+
+        alert(
+            "❌ El nombre no puede estar vacío."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/admin/cuenta/" +
+                id +
+                "/editar",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        nombre: nombre
+                    })
+                }
+            );
+
+
+        const datos =
+            await respuesta.json();
+
+
+        if (datos.ok) {
+
+            alert(
+                "✅ Nombre de cuenta actualizado."
+            );
+
+
+            cargarCuentas();
+
+        } else {
+
+            alert(
+                "❌ " + datos.mensaje
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        alert(
+            "❌ Error de conexión."
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// ELIMINAR CUENTA
+// =====================================================
+
+async function eliminarCuenta(id) {
+
+    const confirmar =
+        confirm(
+            "⚠️ ¿Seguro que deseas eliminar esta cuenta?\n\nTambién se eliminarán sus perfiles."
+        );
+
+
+    if (!confirmar) {
+        return;
+    }
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/admin/cuenta/" +
+                id +
+                "/eliminar",
+                {
+                    method: "POST"
+                }
+            );
+
+
+        const datos =
+            await respuesta.json();
+
+
+        if (datos.ok) {
+
+            alert(
+                "✅ Cuenta eliminada."
+            );
+
+
+            cargarCuentas();
+
+        } else {
+
+            alert(
+                "❌ " + datos.mensaje
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        alert(
+            "❌ Error de conexión."
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// SEGURIDAD BÁSICA HTML
+// =====================================================
+
+function escapeHtml(texto) {
+
+    return String(texto)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// =====================================================
+// INICIO
+// =====================================================
+
+cargarCuentas();
+
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Disney+ Code</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 400px;
+            background: #1d1d1d;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #bbb;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px;
+            margin-top: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 8px;
+            background: #0063e5;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #solicitar {
+            display: none;
+        }
+
+        #nuevoCodigo {
+            display: none;
+            background: #333;
+        }
+
+        #resultado {
+            margin-top: 20px;
+            font-weight: bold;
+            min-height: 20px;
+        }
+
+        #codigo {
+            display: none;
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 20px;
+            letter-spacing: 7px;
+        }
+
+        .info-cuenta {
+            display: none;
+            margin-top: 15px;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="contenedor">
+
+    <h1>🎬 Disney+ Code</h1>
+
+    <p>
+        Ingresa el nombre de tu perfil
+        y tu PIN.
+    </p>
+
+
+    <!-- PERFIL -->
+
+    <input
+        type="text"
+        id="nombre"
+        placeholder="Nombre del perfil"
+        autocomplete="off"
+    >
+
+
+    <!-- PIN -->
+
+    <input
+        type="password"
+        id="pin"
+        placeholder="PIN del perfil"
+        inputmode="numeric"
+        autocomplete="off"
+    >
+
+
+    <!-- VERIFICAR -->
+
+    <button
+        id="verificar"
+        onclick="verificarPerfil()"
+    >
+        VERIFICAR PERFIL
+    </button>
+
+
+    <!-- SOLICITAR PRIMER CÓDIGO -->
+
+    <button
+        id="solicitar"
+        onclick="solicitarCodigo()"
+    >
+        SOLICITAR CÓDIGO
+    </button>
+
+
+    <!-- CUENTA -->
+
+    <div
+        id="infoCuenta"
+        class="info-cuenta"
+    ></div>
+
+
+    <!-- MENSAJE -->
+
+    <div id="resultado"></div>
+
+
+    <!-- CÓDIGO -->
+
+    <div id="codigo"></div>
+
+
+    <!-- NUEVO CÓDIGO -->
+
+    <button
+        id="nuevoCodigo"
+        onclick="solicitarNuevoCodigo()"
+    >
+        🔄 SOLICITAR OTRO CÓDIGO
+    </button>
+
+</div>
+
+
+<script>
+
+
+// ========================================================
+// VERIFICAR PERFIL
+// ========================================================
+
+async function verificarPerfil() {
+
+    const nombre =
+        document.getElementById(
+            "nombre"
+        ).value.trim();
+
+    const pin =
+        document.getElementById(
+            "pin"
+        ).value.trim();
+
+    const resultado =
+        document.getElementById(
+            "resultado"
+        );
+
+    const boton =
+        document.getElementById(
+            "verificar"
+        );
+
+    const solicitar =
+        document.getElementById(
+            "solicitar"
+        );
+
+    const nuevoCodigo =
+        document.getElementById(
+            "nuevoCodigo"
+        );
+
+    const codigo =
+        document.getElementById(
+            "codigo"
+        );
+
+    const infoCuenta =
+        document.getElementById(
+            "infoCuenta"
+        );
+
+
+    // Limpiar estados anteriores
+
+    solicitar.style.display = "none";
+
+    nuevoCodigo.style.display = "none";
+
+    codigo.style.display = "none";
+
+    infoCuenta.style.display = "none";
+
+
+    if (!nombre || !pin) {
+
+        resultado.textContent =
+            "❌ Completa ambos campos.";
+
+        return;
+    }
+
+
+    boton.disabled = true;
+
+    resultado.textContent =
+        "⏳ Verificando...";
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/verificar-perfil",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        pin: pin
+                    })
+                }
+            );
+
+
+        const datos =
+            await respuesta.json();
+
+
+        if (datos.ok) {
+
+            resultado.textContent =
+                "✅ Perfil verificado";
+
+
+            // Mostrar cuenta asociada
+
+            if (datos.correo) {
+
+                infoCuenta.textContent =
+                    "📧 Cuenta: " +
+                    datos.correo;
+
+                infoCuenta.style.display =
+                    "block";
+            }
+
+
+            boton.style.display =
+                "none";
+
+
+            solicitar.style.display =
+                "block";
+
+
+        } else {
+
+            resultado.textContent =
+                "❌ " +
+                datos.mensaje;
+
+            boton.disabled = false;
+        }
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        resultado.textContent =
+            "❌ Error de conexión.";
+
+        boton.disabled = false;
+    }
+
+}
+
+
+
+// ========================================================
+// SOLICITAR ÚLTIMO CÓDIGO
+// ========================================================
+
+async function solicitarCodigo() {
+
+    const nombre =
+        document.getElementById(
+            "nombre"
+        ).value.trim();
+
+    const pin =
+        document.getElementById(
+            "pin"
+        ).value.trim();
+
+    const resultado =
+        document.getElementById(
+            "resultado"
+        );
+
+    const boton =
+        document.getElementById(
+            "solicitar"
+        );
+
+    const nuevoCodigo =
+        document.getElementById(
+            "nuevoCodigo"
+        );
+
+    const codigo =
+        document.getElementById(
+            "codigo"
+        );
+
+
+    boton.disabled = true;
+
+    nuevoCodigo.style.display =
+        "none";
+
+    codigo.style.display =
+        "none";
+
+    resultado.textContent =
+        "⏳ Buscando último código...";
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/solicitar-codigo",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        pin: pin
+                    })
+                }
+            );
+
+
+        const datos =
+            await respuesta.json();
+
+
+        if (datos.ok) {
+
+            resultado.textContent =
+                "✅ Código encontrado";
+
+
+            codigo.textContent =
+                datos.codigo;
+
+
+            codigo.style.display =
+                "block";
+
+
+            // Mostrar botón para pedir otro
+
+            nuevoCodigo.style.display =
+                "block";
+
+
+        } else {
+
+            resultado.textContent =
+                "❌ " +
+                datos.mensaje;
+        }
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        resultado.textContent =
+            "❌ Error de conexión.";
+    }
+
+
+    boton.disabled = false;
+
+}
+
+
+
+// ========================================================
+// SOLICITAR NUEVO CÓDIGO
+// ========================================================
+
+async function solicitarNuevoCodigo() {
+
+    const nombre =
+        document.getElementById(
+            "nombre"
+        ).value.trim();
+
+    const pin =
+        document.getElementById(
+            "pin"
+        ).value.trim();
+
+    const resultado =
+        document.getElementById(
+            "resultado"
+        );
+
+    const boton =
+        document.getElementById(
+            "nuevoCodigo"
+        );
+
+    const codigo =
+        document.getElementById(
+            "codigo"
+        );
+
+
+    boton.disabled = true;
+
+    codigo.style.display =
+        "none";
+
+
+    resultado.textContent =
+        "⏳ Esperando nuevo código...";
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/solicitar-nuevo-codigo",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        pin: pin
+                    })
+                }
+            );
+
+
+        const datos =
+            await respuesta.json();
+
+
+        if (datos.ok) {
+
+            resultado.textContent =
+                "✅ Nuevo código encontrado";
+
+
+            codigo.textContent =
+                datos.codigo;
+
+
+            codigo.style.display =
+                "block";
+
+
+        } else {
+
+            resultado.textContent =
+                "❌ " +
+                datos.mensaje;
+        }
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        resultado.textContent =
+            "❌ Error de conexión.";
+    }
+
+
+    boton.disabled = false;
+
+}
+
+
+</script>
+
+</body>
+
+</html>

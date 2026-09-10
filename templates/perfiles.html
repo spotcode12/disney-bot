@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Administrar perfiles</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            margin: 0;
+            padding: 30px 15px;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .cabecera {
+            background: #1d1d1d;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .correo {
+            color: #bbb;
+            font-size: 16px;
+        }
+
+        .tarjeta {
+            background: #1d1d1d;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            background: #0063e5;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .boton-agregar {
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .perfil {
+            background: #292929;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 12px;
+        }
+
+        .perfil-nombre {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .perfil-info {
+            color: #bbb;
+            margin-top: 5px;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .acciones button {
+            flex: 1;
+        }
+
+        .desactivar {
+            background: #555;
+        }
+
+        .eliminar {
+            background: #b00020;
+        }
+
+        .volver {
+            background: #333;
+            margin-bottom: 20px;
+        }
+
+        #resultado {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="contenedor">
+
+    <button
+        class="volver"
+        onclick="window.location.href='/admin'"
+    >
+        ← VOLVER
+    </button>
+
+
+    <div class="cabecera">
+
+        <h1>👤 Administración de perfiles</h1>
+
+        <div id="cuenta">
+            ⏳ Cargando cuenta...
+        </div>
+
+    </div>
+
+
+    <div class="tarjeta">
+
+        <h2>➕ Nuevo perfil</h2>
+
+        <input
+            type="text"
+            id="nombre"
+            placeholder="Nombre del perfil"
+            autocomplete="off"
+        >
+
+        <input
+            type="password"
+            id="pin"
+            placeholder="PIN del perfil"
+            inputmode="numeric"
+            autocomplete="off"
+        >
+
+        <button
+            class="boton-agregar"
+            onclick="agregarPerfil()"
+        >
+            AGREGAR PERFIL
+        </button>
+
+        <div id="resultado"></div>
+
+    </div>
+
+
+    <div class="tarjeta">
+
+        <h2>📋 Perfiles registrados</h2>
+
+        <div id="perfiles">
+            ⏳ Cargando...
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const cuentaId = {{ cuenta_id }};
+
+
+async function cargarCuenta() {
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/admin/cuenta/" + cuentaId + "/datos"
+            );
+
+        const datos =
+            await respuesta.json();
+
+
+        if (!datos.ok) {
+
+            document.getElementById(
+                "cuenta"
+            ).textContent =
+                "❌ Cuenta no encontrada.";
+
+            return;
+        }
+
+
+        document.getElementById(
+            "cuenta"
+        ).innerHTML = `
+            <strong>${datos.cuenta.nombre}</strong>
+            <div class="correo">
+                📧 ${datos.cuenta.correo}
+            </div>
+            <div class="correo">
+                Estado: ${datos.cuenta.estado}
+            </div>
+        `;
+
+
+    } catch (error) {
+
+        document.getElementById(
+            "cuenta"
+        ).textContent =
+            "❌ Error de conexión.";
+
+    }
+
+}
+
+
+async function cargarPerfiles() {
+
+    const contenedor =
+        document.getElementById("perfiles");
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/admin/cuenta/" +
+                cuentaId +
+                "/perfiles"
+            );
+
+        const datos =
+            await respuesta.json();
+
+
+        if (!datos.ok) {
+
+            contenedor.textContent =
+                "❌ No se pudieron cargar los perfiles.";
+
+            return;
+        }
+
+
+        if (datos.perfiles.length === 0) {
+
+            contenedor.textContent =
+                "No hay perfiles registrados.";
+
+            return;
+        }
+
+
+        contenedor.innerHTML = "";
+
+
+        datos.perfiles.forEach(perfil => {
+
+            const div =
+                document.createElement("div");
+
+            div.className = "perfil";
+
+
+            const estado =
+                perfil.activo
+                    ? "🟢 Activo"
+                    : "🔴 Inactivo";
+
+
+            div.innerHTML = `
+                <div class="perfil-nombre">
+                    👤 ${perfil.nombre}
+                </div>
+
+                <div class="perfil-info">
+                    🔐 PIN: ••••
+                </div>
+
+                <div class="perfil-info">
+                    ${estado}
+                </div>
+
+                <div class="acciones">
+
+                    <button
+                        onclick="editarPerfil(
+                            ${perfil.id},
+                            '${escapeHtml(perfil.nombre)}'
+                        )"
+                    >
+                        ✏️ EDITAR
+                    </button>
+
+                    <button
+                        class="desactivar"
+                        onclick="cambiarEstado(
+                            ${perfil.id},
+                            ${perfil.activo ? 0 : 1}
+                        )"
+                    >
+                        ${perfil.activo
+                            ? "DESACTIVAR"
+                            : "ACTIVAR"}
+                    </button>
+
+                    <button
+                        class="eliminar"
+                        onclick="eliminarPerfil(
+                            ${perfil.id}
+                        )"
+                    >
+                        🗑️
+                    </button>
+
+                </div>
+            `;
+
+            contenedor.appendChild(div);
+
+        });
+
+
+    } catch (error) {
+
+        contenedor.textContent =
+            "❌ Error de conexión.";
+
+    }
+
+}
+
+
+function escapeHtml(texto) {
+
+    return texto
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'");
+
+}
+
+
+async function agregarPerfil() {
+
+    const nombre =
+        document.getElementById(
+            "nombre"
+        ).value.trim();
+
+    const pin =
+        document.getElementById(
+            "pin"
+        ).value.trim();
+
+    const resultado =
+        document.getElementById(
+            "resultado"
+        );
+
+
+    if (!nombre || !pin) {
+
+        resultado.textContent =
+            "❌ Completa nombre y PIN.";
+
+        return;
+    }
+
+
+    resultado.textContent =
+        "⏳ Guardando...";
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/admin/cuenta/" +
+                cuentaId +
+                "/agregar-perfil",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        pin: pin
+                    })
+                }
+            );
+
+
+        const datos =
+            await respuesta.json();
+
+
+        if (datos.ok) {
+
+            resultado.textContent =
+                "✅ Perfil agregado.";
+
+            document.getElementById(
+                "nombre"
+            ).value = "";
+
+            document.getElementById(
+                "pin"
+            ).value = "";
+
+            cargarPerfiles();
+
+        } else {
+
+            resultado.textContent =
+                "❌ " + datos.mensaje;
+
+        }
+
+
+    } catch (error) {
+
+        resultado.textContent =
+            "❌ Error de conexión.";
+
+    }
+
+}
+
+
+async function editarPerfil(id, nombreActual) {
+
+    const nuevoNombre =
+        prompt(
+            "Nuevo nombre del perfil:",
+            nombreActual
+        );
+
+
+    if (nuevoNombre === null) {
+        return;
+    }
+
+
+    const nuevoPin =
+        prompt(
+            "Nuevo PIN del perfil:"
+        );
+
+
+    if (nuevoPin === null) {
+        return;
+    }
+
+
+    if (
+        !nuevoNombre.trim() ||
+        !nuevoPin.trim()
+    ) {
+
+        alert(
+            "Nombre y PIN son obligatorios."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/admin/perfil/" +
+                id +
+                "/editar",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        nombre:
+                            nuevoNombre.trim(),
+                        pin:
+                            nuevoPin.trim()
+                    })
+                }
+            );
+
+
+        const datos =
+            await respuesta.json();
+
+
+        if (datos.ok) {
+
+            alert(
+                "✅ Perfil actualizado."
+            );
+
+            cargarPerfiles();
+
+        } else {
+
+            alert(
+                "❌ " + datos.mensaje
+            );
+
+        }
+
+
+    } catch (error) {
+
+        alert(
+            "❌ Error de conexión."
+        );
+
+    }
+
+}
+
+
+async function cambiarEstado(id, activo) {
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/admin/perfil/" +
+                id +
+                "/estado",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        activo: activo
+                    })
+                }
+            );
+
+
+        const datos =
+            await respuesta.json();
+
+
+        if (datos.ok) {
+
+            cargarPerfiles();
+
+        } else {
+
+            alert(
+                "❌ " + datos.mensaje
+            );
+
+        }
+
+
+    } catch (error) {
+
+        alert(
+            "❌ Error de conexión."
+        );
+
+    }
+
+}
+
+
+async function eliminarPerfil(id) {
+
+    if (
+        !confirm(
+            "¿Seguro que deseas eliminar este perfil?"
+        )
+    ) {
+        return;
+    }
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "/admin/perfil/" +
+                id +
+                "/eliminar",
+                {
+                    method: "POST"
+                }
+            );
+
+
+        const datos =
+            await respuesta.json();
+
+
+        if (datos.ok) {
+
+            cargarPerfiles();
+
+        } else {
+
+            alert(
+                "❌ " + datos.mensaje
+            );
+
+        }
+
+
+    } catch (error) {
+
+        alert(
+            "❌ Error de conexión."
+        );
+
+    }
+
+}
+
+
+cargarCuenta();
+cargarPerfiles();
+
+</script>
+
+</body>
+
+</html>

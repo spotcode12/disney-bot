@@ -1,0 +1,12 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+disney.db
+
+agregar_perfiles.py
+diagnostico_mail.py
+leer_correos.py
+probar_perfil.py
+test_mail.py
