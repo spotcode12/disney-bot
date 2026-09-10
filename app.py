@@ -13,6 +13,8 @@ from database import (
     editar_perfil,
     cambiar_estado_perfil,
     eliminar_perfil
+    obtener_estado_solicitudes,
+    registrar_solicitud
 )
 
 from disney_mail import obtener_codigo_disney
