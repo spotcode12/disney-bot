@@ -355,6 +355,31 @@
     <script>
 
         // ========================================================
+        // OCULTAR DOMINIO DEL CORREO
+        // ========================================================
+
+        function ocultarDominio(correo) {
+            if (!correo || !correo.includes("@")) {
+                return correo;
+            }
+
+            const partes = correo.split("@");
+            const usuario = partes[0];
+            const dominio = partes[1];
+
+            const posicionPunto = dominio.lastIndexOf(".");
+
+            if (posicionPunto > 0) {
+                const extension = dominio.substring(posicionPunto);
+
+                return usuario + "@**************" + extension;
+            }
+
+            return usuario + "@**************";
+        }
+
+
+        // ========================================================
         // VERIFICAR PERFIL
         // ========================================================
 
@@ -421,7 +446,7 @@
 
                     if (datos.correo) {
                         infoCuenta.textContent =
-                            "📧 Cuenta: " + datos.correo;
+                            "📧 Cuenta: " + ocultarDominio(datos.correo);
 
                         infoCuenta.style.display = "block";
                     }
