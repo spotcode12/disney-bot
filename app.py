@@ -201,9 +201,14 @@ def solicitar_codigo():
             "mensaje": "Perfil o PIN incorrecto."
         }), 401
 
+    # =====================================================
+    # DATOS CORRECTOS DEL PERFIL
+    # =====================================================
+
+    perfil_id = perfil[0]
     cuenta_id = perfil[1]
     nombre_perfil = perfil[2]
-    correo_cuenta = perfil[3]
+    correo_cuenta = perfil[5]
 
     print(
         f"📩 Solicitud de código: "
@@ -212,12 +217,11 @@ def solicitar_codigo():
     )
 
     # =====================================================
-    # VERIFICAR LÍMITE DIARIO DE SOLICITUDES
+    # VERIFICAR LÍMITE DIARIO
     # =====================================================
 
     estado = obtener_estado_solicitudes(
-        cuenta_id,
-        nombre_perfil
+        perfil_id
     )
 
     if not estado["permitido"]:
@@ -228,8 +232,9 @@ def solicitar_codigo():
                 "Has alcanzado el límite de 3 códigos "
                 "por hoy. Intenta nuevamente mañana."
             ),
-            "solicitudes": estado["solicitudes"],
-            "limite": estado["limite"]
+            "solicitudes": estado["cantidad"],
+            "limite": 3,
+            "restantes": 0
         }), 429
 
     # =====================================================
@@ -256,10 +261,16 @@ def solicitar_codigo():
     # REGISTRAR SOLICITUD EXITOSA
     # =====================================================
 
-    registrar_solicitud(
-        cuenta_id,
-        nombre_perfil
+    registro = registrar_solicitud(
+        perfil_id
     )
+
+    if not registro["permitido"]:
+
+        return jsonify({
+            "ok": False,
+            "mensaje": "Has alcanzado el límite diario."
+        }), 429
 
     print(
         f"🔐 Código obtenido para "
@@ -269,8 +280,9 @@ def solicitar_codigo():
     return jsonify({
         "ok": True,
         "codigo": codigo,
-        "solicitudes": estado["solicitudes"] + 1,
-        "limite": estado["limite"]
+        "solicitudes": registro["cantidad"],
+        "limite": 3,
+        "restantes": registro["restantes"]
     })
 
 
