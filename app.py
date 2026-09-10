@@ -12,7 +12,7 @@ from database import (
     agregar_perfil,
     editar_perfil,
     cambiar_estado_perfil,
-    eliminar_perfil
+    eliminar_perfil,
     obtener_estado_solicitudes,
     registrar_solicitud
 )
