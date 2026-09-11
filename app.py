@@ -36,12 +36,12 @@ app = Flask(__name__)
 # CONFIGURACIÓN
 # =========================================================
 
-crear_tablas()
-
 app.secret_key = os.getenv(
     "FLASK_SECRET_KEY",
     "CAMBIA-ESTA-CLAVE"
 )
+
+crear_tablas()
 
 
 # =========================================================
@@ -81,9 +81,10 @@ def admin_required(func):
 
 # =========================================================
 # OCULTAR DOMINIO DEL CORREO
+#
 # Ejemplo:
 # tifycuen@streamservice2.space
-# tifycuen@********.space
+# tifycuen@**************.space
 # =========================================================
 
 def ocultar_dominio(correo):
@@ -176,6 +177,11 @@ def verificar():
         session.pop("cuenta_id", None)
         session.pop("perfil_nombre", None)
         session.pop("correo_cuenta", None)
+        session.pop("perfil_verificado", None)
+
+        print(
+            f"❌ Perfil no verificado: {nombre}"
+        )
 
         return jsonify({
             "ok": False,
@@ -184,24 +190,31 @@ def verificar():
             "message": "Perfil o PIN incorrecto."
         }), 401
 
-    # Según la estructura actual de database.py:
+    # =====================================================
+    # ESTRUCTURA ACTUAL DE database.py
     #
     # perfil[0] = id del perfil
     # perfil[1] = id de la cuenta
     # perfil[2] = nombre del perfil
     # perfil[5] = correo de la cuenta
+    # =====================================================
 
     perfil_id = perfil[0]
     cuenta_id = perfil[1]
     nombre_perfil = perfil[2]
     correo_cuenta = perfil[5]
 
-    # Guardar datos en la sesión
+    # =====================================================
+    # GUARDAR DATOS EN LA SESIÓN
+    # =====================================================
+
     session["perfil_id"] = perfil_id
     session["cuenta_id"] = cuenta_id
     session["perfil_nombre"] = nombre_perfil
     session["correo_cuenta"] = correo_cuenta
+    session["perfil_verificado"] = True
 
+    # Correo oculto para el cliente
     cuenta_mostrada = ocultar_dominio(
         correo_cuenta
     )
@@ -220,7 +233,7 @@ def verificar():
         "perfil": nombre_perfil,
         "cuenta_id": cuenta_id,
 
-        # Correo oculto para mostrar al cliente
+        # Se muestra el correo oculto
         "cuenta": cuenta_mostrada,
         "correo_mostrado": cuenta_mostrada
     })
@@ -248,11 +261,19 @@ def procesar_solicitud_codigo(tipo_solicitud="normal"):
         "correo_cuenta"
     )
 
-    # -----------------------------------------------------
-    # VALIDAR SESIÓN
-    # -----------------------------------------------------
+    perfil_verificado = session.get(
+        "perfil_verificado"
+    )
 
-    if not perfil_id or not correo_cuenta:
+    # =====================================================
+    # VALIDAR SESIÓN
+    # =====================================================
+
+    if (
+        not perfil_id
+        or not correo_cuenta
+        or not perfil_verificado
+    ):
 
         return jsonify({
             "ok": False,
@@ -260,6 +281,10 @@ def procesar_solicitud_codigo(tipo_solicitud="normal"):
             "mensaje": "Debes verificar tu perfil primero.",
             "message": "Debes verificar tu perfil primero."
         }), 400
+
+    # =====================================================
+    # MOSTRAR EN LOG EL TIPO DE SOLICITUD
+    # =====================================================
 
     if tipo_solicitud == "nuevo":
 
@@ -277,9 +302,9 @@ def procesar_solicitud_codigo(tipo_solicitud="normal"):
             f"Cuenta: {correo_cuenta}"
         )
 
-    # -----------------------------------------------------
+    # =====================================================
     # VERIFICAR LÍMITE DIARIO
-    # -----------------------------------------------------
+    # =====================================================
 
     estado = obtener_estado_solicitudes(
         perfil_id
@@ -302,9 +327,9 @@ def procesar_solicitud_codigo(tipo_solicitud="normal"):
             "restantes": 0
         }), 429
 
-    # -----------------------------------------------------
+    # =====================================================
     # CONSULTAR EL CORREO
-    # -----------------------------------------------------
+    # =====================================================
 
     try:
 
@@ -326,6 +351,10 @@ def procesar_solicitud_codigo(tipo_solicitud="normal"):
             "message": "Ocurrió un error al consultar el correo."
         }), 500
 
+    # =====================================================
+    # VALIDAR SI SE ENCONTRÓ CÓDIGO
+    # =====================================================
+
     if not codigo:
 
         print(
@@ -346,9 +375,9 @@ def procesar_solicitud_codigo(tipo_solicitud="normal"):
             )
         }), 404
 
-    # -----------------------------------------------------
+    # =====================================================
     # REGISTRAR SOLICITUD EXITOSA
-    # -----------------------------------------------------
+    # =====================================================
 
     registro = registrar_solicitud(
         perfil_id
@@ -360,7 +389,10 @@ def procesar_solicitud_codigo(tipo_solicitud="normal"):
             "ok": False,
             "success": False,
             "mensaje": "Has alcanzado el límite diario.",
-            "message": "Has alcanzado el límite diario."
+            "message": "Has alcanzado el límite diario.",
+            "solicitudes": registro.get("cantidad", 3),
+            "limite": 3,
+            "restantes": 0
         }), 429
 
     print(
@@ -368,13 +400,25 @@ def procesar_solicitud_codigo(tipo_solicitud="normal"):
         f"{correo_cuenta}: {codigo}"
     )
 
+    # =====================================================
+    # MENSAJE SEGÚN EL TIPO DE SOLICITUD
+    # =====================================================
+
     if tipo_solicitud == "nuevo":
 
-        mensaje_exito = "Nuevo código obtenido correctamente."
+        mensaje_exito = (
+            "Nuevo código obtenido correctamente."
+        )
 
     else:
 
-        mensaje_exito = "Código obtenido correctamente."
+        mensaje_exito = (
+            "Código obtenido correctamente."
+        )
+
+    # =====================================================
+    # RESPUESTA AL FRONTEND
+    # =====================================================
 
     return jsonify({
         "ok": True,
