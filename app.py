@@ -22,15 +22,12 @@ from disney_mail import obtener_codigo_disney
 
 app = Flask(__name__)
 
-crear_tablas()
-
-# SECURITY
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "CAMBIA-ESTA-CLAVE")
-
 
 # =========================================================
 # CONFIGURACIÓN
 # =========================================================
+
+crear_tablas()
 
 app.secret_key = os.getenv(
     "FLASK_SECRET_KEY",
@@ -95,13 +92,17 @@ def inicio():
 )
 def verificar():
 
-    datos = request.get_json()
+    datos = request.get_json(
+        silent=True
+    )
 
     if not datos:
 
         return jsonify({
             "ok": False,
-            "mensaje": "No se recibieron datos."
+            "success": False,
+            "mensaje": "No se recibieron datos.",
+            "message": "No se recibieron datos."
         }), 400
 
     nombre = datos.get(
@@ -118,7 +119,9 @@ def verificar():
 
         return jsonify({
             "ok": False,
-            "mensaje": "Ingresa tu perfil y PIN."
+            "success": False,
+            "mensaje": "Ingresa tu perfil y PIN.",
+            "message": "Ingresa tu perfil y PIN."
         }), 400
 
     perfil = verificar_perfil(
@@ -128,15 +131,36 @@ def verificar():
 
     if not perfil:
 
+        # Limpiar cualquier sesión anterior
+        session.pop("perfil_id", None)
+        session.pop("cuenta_id", None)
+        session.pop("perfil_nombre", None)
+        session.pop("correo_cuenta", None)
+
         return jsonify({
             "ok": False,
-            "mensaje": "Perfil o PIN incorrecto."
+            "success": False,
+            "mensaje": "Perfil o PIN incorrecto.",
+            "message": "Perfil o PIN incorrecto."
         }), 401
+
+    # =====================================================
+    # DATOS CORRECTOS DEL PERFIL
+    # =====================================================
 
     perfil_id = perfil[0]
     cuenta_id = perfil[1]
     nombre_perfil = perfil[2]
     correo_cuenta = perfil[5]
+
+    # =====================================================
+    # GUARDAR EL PERFIL EN LA SESIÓN
+    # =====================================================
+
+    session["perfil_id"] = perfil_id
+    session["cuenta_id"] = cuenta_id
+    session["perfil_nombre"] = nombre_perfil
+    session["correo_cuenta"] = correo_cuenta
 
     print(
         f"✅ Perfil verificado: "
@@ -146,10 +170,13 @@ def verificar():
 
     return jsonify({
         "ok": True,
+        "success": True,
         "mensaje": "Perfil verificado correctamente.",
+        "message": "Perfil verificado correctamente.",
         "perfil": nombre_perfil,
         "cuenta_id": cuenta_id,
-        "correo": correo_cuenta
+        "correo": correo_cuenta,
+        "cuenta": correo_cuenta
     })
 
 
@@ -163,52 +190,38 @@ def verificar():
 )
 def solicitar_codigo():
 
-    datos = request.get_json()
+    # =====================================================
+    # OBTENER DATOS DESDE LA SESIÓN
+    # =====================================================
 
-    if not datos:
-
-        return jsonify({
-            "ok": False,
-            "mensaje": "No se recibieron datos."
-        }), 400
-
-    nombre = datos.get(
-        "nombre",
-        ""
-    ).strip()
-
-    pin = datos.get(
-        "pin",
-        ""
-    ).strip()
-
-    if not nombre or not pin:
-
-        return jsonify({
-            "ok": False,
-            "mensaje": "Debes verificar tu perfil primero."
-        }), 400
-
-    perfil = verificar_perfil(
-        nombre,
-        pin
+    perfil_id = session.get(
+        "perfil_id"
     )
 
-    if not perfil:
+    cuenta_id = session.get(
+        "cuenta_id"
+    )
+
+    nombre_perfil = session.get(
+        "perfil_nombre"
+    )
+
+    correo_cuenta = session.get(
+        "correo_cuenta"
+    )
+
+    # =====================================================
+    # VALIDAR SESIÓN
+    # =====================================================
+
+    if not perfil_id or not correo_cuenta:
 
         return jsonify({
             "ok": False,
-            "mensaje": "Perfil o PIN incorrecto."
-        }), 401
-
-    # =====================================================
-    # DATOS CORRECTOS DEL PERFIL
-    # =====================================================
-
-    perfil_id = perfil[0]
-    cuenta_id = perfil[1]
-    nombre_perfil = perfil[2]
-    correo_cuenta = perfil[5]
+            "success": False,
+            "mensaje": "Debes verificar tu perfil primero.",
+            "message": "Debes verificar tu perfil primero."
+        }), 400
 
     print(
         f"📩 Solicitud de código: "
@@ -228,7 +241,12 @@ def solicitar_codigo():
 
         return jsonify({
             "ok": False,
+            "success": False,
             "mensaje": (
+                "Has alcanzado el límite de 3 códigos "
+                "por hoy. Intenta nuevamente mañana."
+            ),
+            "message": (
                 "Has alcanzado el límite de 3 códigos "
                 "por hoy. Intenta nuevamente mañana."
             ),
@@ -241,9 +259,25 @@ def solicitar_codigo():
     # OBTENER CÓDIGO DESDE EL CORREO
     # =====================================================
 
-    codigo = obtener_codigo_disney(
-        correo_cuenta
-    )
+    try:
+
+        codigo = obtener_codigo_disney(
+            correo_cuenta
+        )
+
+    except Exception as error:
+
+        print(
+            f"❌ Error obteniendo código para "
+            f"{correo_cuenta}: {error}"
+        )
+
+        return jsonify({
+            "ok": False,
+            "success": False,
+            "mensaje": "Ocurrió un error al consultar el correo.",
+            "message": "Ocurrió un error al consultar el correo."
+        }), 500
 
     if not codigo:
 
@@ -254,7 +288,9 @@ def solicitar_codigo():
 
         return jsonify({
             "ok": False,
-            "mensaje": "No se encontró un código."
+            "success": False,
+            "mensaje": "No se encontró un código.",
+            "message": "No se encontró un código."
         }), 404
 
     # =====================================================
@@ -269,7 +305,9 @@ def solicitar_codigo():
 
         return jsonify({
             "ok": False,
-            "mensaje": "Has alcanzado el límite diario."
+            "success": False,
+            "mensaje": "Has alcanzado el límite diario.",
+            "message": "Has alcanzado el límite diario."
         }), 429
 
     print(
@@ -279,6 +317,7 @@ def solicitar_codigo():
 
     return jsonify({
         "ok": True,
+        "success": True,
         "codigo": codigo,
         "solicitudes": registro["cantidad"],
         "limite": 3,
@@ -297,6 +336,7 @@ def solicitar_codigo():
 def admin_login():
 
     # Si ya inició sesión, no necesita volver al login
+
     if session.get("admin_logged_in"):
 
         return redirect(
@@ -419,7 +459,9 @@ def admin_cuentas():
 @admin_required
 def admin_agregar_cuenta():
 
-    datos = request.get_json()
+    datos = request.get_json(
+        silent=True
+    )
 
     if not datos:
 
@@ -524,6 +566,7 @@ def admin_cuenta_datos(cuenta_id):
 @app.route(
     "/admin/cuenta/<int:cuenta_id>/perfiles"
 )
+@admin_required
 def listar_perfiles(cuenta_id):
 
     cuenta = obtener_cuenta(
@@ -579,7 +622,9 @@ def admin_agregar_perfil(cuenta_id):
             "mensaje": "Cuenta no encontrada."
         }), 404
 
-    datos = request.get_json()
+    datos = request.get_json(
+        silent=True
+    )
 
     if not datos:
 
@@ -634,7 +679,9 @@ def admin_agregar_perfil(cuenta_id):
 @admin_required
 def admin_editar_perfil(perfil_id):
 
-    datos = request.get_json()
+    datos = request.get_json(
+        silent=True
+    )
 
     if not datos:
 
@@ -690,7 +737,9 @@ def admin_editar_perfil(perfil_id):
 @admin_required
 def admin_estado_perfil(perfil_id):
 
-    datos = request.get_json()
+    datos = request.get_json(
+        silent=True
+    )
 
     if not datos:
 
