@@ -518,14 +518,13 @@ def admin_cuenta_datos(cuenta_id):
 
 
 # =========================================================
-# LISTAR PERFILES
+# LISTAR PERFILES DE UNA CUENTA
 # =========================================================
 
 @app.route(
     "/admin/cuenta/<int:cuenta_id>/perfiles"
 )
-@admin_required
-def admin_lista_perfiles(cuenta_id):
+def listar_perfiles(cuenta_id):
 
     cuenta = obtener_cuenta(
         cuenta_id
@@ -545,11 +544,12 @@ def admin_lista_perfiles(cuenta_id):
     lista = []
 
     for perfil in perfiles:
-    lista.append({
-        "id": perfil[0],
-        "nombre": perfil[2],
-        "activo": bool(perfil[4])
-    })
+
+        lista.append({
+            "id": perfil[0],
+            "nombre": perfil[2],
+            "activo": bool(perfil[4])
+        })
 
     return jsonify({
         "ok": True,
