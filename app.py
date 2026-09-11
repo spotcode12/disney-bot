@@ -1,4 +1,13 @@
-from flask import Flask, render_template, jsonify, request, session, redirect, url_for
+from flask import (
+    Flask,
+    render_template,
+    jsonify,
+    request,
+    session,
+    redirect,
+    url_for
+)
+
 from functools import wraps
 import os
 
@@ -51,7 +60,7 @@ ADMIN_PASSWORD = os.getenv(
 
 
 # =========================================================
-# DECORADOR DE SEGURIDAD
+# DECORADOR DE SEGURIDAD DEL ADMIN
 # =========================================================
 
 def admin_required(func):
@@ -71,7 +80,39 @@ def admin_required(func):
 
 
 # =========================================================
-# PÁGINA DEL CLIENTE
+# OCULTAR DOMINIO DEL CORREO
+# Ejemplo:
+# tifycuen@streamservice2.space
+# tifycuen@********.space
+# =========================================================
+
+def ocultar_dominio(correo):
+
+    if not correo or "@" not in correo:
+
+        return correo
+
+    usuario, dominio = correo.split("@", 1)
+
+    if "." in dominio:
+
+        partes = dominio.rsplit(".", 1)
+
+        nombre_dominio = partes[0]
+        extension = partes[1]
+
+        dominio_oculto = "*" * max(
+            8,
+            len(nombre_dominio)
+        )
+
+        return f"{usuario}@{dominio_oculto}.{extension}"
+
+    return f"{usuario}@********"
+
+
+# =========================================================
+# PÁGINA PRINCIPAL DEL CLIENTE
 # =========================================================
 
 @app.route("/")
@@ -83,7 +124,7 @@ def inicio():
 
 
 # =========================================================
-# VERIFICAR PERFIL DEL CLIENTE
+# VERIFICAR PERFIL
 # =========================================================
 
 @app.route(
@@ -120,8 +161,8 @@ def verificar():
         return jsonify({
             "ok": False,
             "success": False,
-            "mensaje": "Ingresa tu perfil y PIN.",
-            "message": "Ingresa tu perfil y PIN."
+            "mensaje": "Ingresa el nombre del perfil y el PIN.",
+            "message": "Ingresa el nombre del perfil y el PIN."
         }), 400
 
     perfil = verificar_perfil(
@@ -131,7 +172,6 @@ def verificar():
 
     if not perfil:
 
-        # Limpiar cualquier sesión anterior
         session.pop("perfil_id", None)
         session.pop("cuenta_id", None)
         session.pop("perfil_nombre", None)
@@ -144,23 +184,27 @@ def verificar():
             "message": "Perfil o PIN incorrecto."
         }), 401
 
-    # =====================================================
-    # DATOS CORRECTOS DEL PERFIL
-    # =====================================================
+    # Según la estructura actual de database.py:
+    #
+    # perfil[0] = id del perfil
+    # perfil[1] = id de la cuenta
+    # perfil[2] = nombre del perfil
+    # perfil[5] = correo de la cuenta
 
     perfil_id = perfil[0]
     cuenta_id = perfil[1]
     nombre_perfil = perfil[2]
     correo_cuenta = perfil[5]
 
-    # =====================================================
-    # GUARDAR EL PERFIL EN LA SESIÓN
-    # =====================================================
-
+    # Guardar datos en la sesión
     session["perfil_id"] = perfil_id
     session["cuenta_id"] = cuenta_id
     session["perfil_nombre"] = nombre_perfil
     session["correo_cuenta"] = correo_cuenta
+
+    cuenta_mostrada = ocultar_dominio(
+        correo_cuenta
+    )
 
     print(
         f"✅ Perfil verificado: "
@@ -175,24 +219,18 @@ def verificar():
         "message": "Perfil verificado correctamente.",
         "perfil": nombre_perfil,
         "cuenta_id": cuenta_id,
-        "correo": correo_cuenta,
-        "cuenta": correo_cuenta
+
+        # Correo oculto para mostrar al cliente
+        "cuenta": cuenta_mostrada,
+        "correo_mostrado": cuenta_mostrada
     })
 
 
 # =========================================================
-# SOLICITAR CÓDIGO
+# FUNCIÓN INTERNA PARA PROCESAR SOLICITUDES DE CÓDIGO
 # =========================================================
 
-@app.route(
-    "/solicitar-codigo",
-    methods=["POST"]
-)
-def solicitar_codigo():
-
-    # =====================================================
-    # OBTENER DATOS DESDE LA SESIÓN
-    # =====================================================
+def procesar_solicitud_codigo(tipo_solicitud="normal"):
 
     perfil_id = session.get(
         "perfil_id"
@@ -210,9 +248,9 @@ def solicitar_codigo():
         "correo_cuenta"
     )
 
-    # =====================================================
+    # -----------------------------------------------------
     # VALIDAR SESIÓN
-    # =====================================================
+    # -----------------------------------------------------
 
     if not perfil_id or not correo_cuenta:
 
@@ -223,15 +261,25 @@ def solicitar_codigo():
             "message": "Debes verificar tu perfil primero."
         }), 400
 
-    print(
-        f"📩 Solicitud de código: "
-        f"{nombre_perfil} | "
-        f"Cuenta: {correo_cuenta}"
-    )
+    if tipo_solicitud == "nuevo":
 
-    # =====================================================
+        print(
+            f"🔄 Solicitud de NUEVO código: "
+            f"{nombre_perfil} | "
+            f"Cuenta: {correo_cuenta}"
+        )
+
+    else:
+
+        print(
+            f"📩 Solicitud de código: "
+            f"{nombre_perfil} | "
+            f"Cuenta: {correo_cuenta}"
+        )
+
+    # -----------------------------------------------------
     # VERIFICAR LÍMITE DIARIO
-    # =====================================================
+    # -----------------------------------------------------
 
     estado = obtener_estado_solicitudes(
         perfil_id
@@ -239,25 +287,24 @@ def solicitar_codigo():
 
     if not estado["permitido"]:
 
+        mensaje_limite = (
+            "Has alcanzado el límite de 3 solicitudes "
+            "por hoy. Intenta nuevamente mañana."
+        )
+
         return jsonify({
             "ok": False,
             "success": False,
-            "mensaje": (
-                "Has alcanzado el límite de 3 códigos "
-                "por hoy. Intenta nuevamente mañana."
-            ),
-            "message": (
-                "Has alcanzado el límite de 3 códigos "
-                "por hoy. Intenta nuevamente mañana."
-            ),
+            "mensaje": mensaje_limite,
+            "message": mensaje_limite,
             "solicitudes": estado["cantidad"],
             "limite": 3,
             "restantes": 0
         }), 429
 
-    # =====================================================
-    # OBTENER CÓDIGO DESDE EL CORREO
-    # =====================================================
+    # -----------------------------------------------------
+    # CONSULTAR EL CORREO
+    # -----------------------------------------------------
 
     try:
 
@@ -268,7 +315,7 @@ def solicitar_codigo():
     except Exception as error:
 
         print(
-            f"❌ Error obteniendo código para "
+            f"❌ Error consultando código para "
             f"{correo_cuenta}: {error}"
         )
 
@@ -289,13 +336,19 @@ def solicitar_codigo():
         return jsonify({
             "ok": False,
             "success": False,
-            "mensaje": "No se encontró un código.",
-            "message": "No se encontró un código."
+            "mensaje": (
+                "No se encontró un código disponible. "
+                "Intenta nuevamente en unos segundos."
+            ),
+            "message": (
+                "No se encontró un código disponible. "
+                "Intenta nuevamente en unos segundos."
+            )
         }), 404
 
-    # =====================================================
+    # -----------------------------------------------------
     # REGISTRAR SOLICITUD EXITOSA
-    # =====================================================
+    # -----------------------------------------------------
 
     registro = registrar_solicitud(
         perfil_id
@@ -315,14 +368,54 @@ def solicitar_codigo():
         f"{correo_cuenta}: {codigo}"
     )
 
+    if tipo_solicitud == "nuevo":
+
+        mensaje_exito = "Nuevo código obtenido correctamente."
+
+    else:
+
+        mensaje_exito = "Código obtenido correctamente."
+
     return jsonify({
         "ok": True,
         "success": True,
+        "mensaje": mensaje_exito,
+        "message": mensaje_exito,
         "codigo": codigo,
         "solicitudes": registro["cantidad"],
         "limite": 3,
         "restantes": registro["restantes"]
     })
+
+
+# =========================================================
+# SOLICITAR PRIMER CÓDIGO
+# =========================================================
+
+@app.route(
+    "/solicitar-codigo",
+    methods=["POST"]
+)
+def solicitar_codigo():
+
+    return procesar_solicitud_codigo(
+        "normal"
+    )
+
+
+# =========================================================
+# SOLICITAR NUEVO CÓDIGO
+# =========================================================
+
+@app.route(
+    "/solicitar-nuevo-codigo",
+    methods=["POST"]
+)
+def solicitar_nuevo_codigo():
+
+    return procesar_solicitud_codigo(
+        "nuevo"
+    )
 
 
 # =========================================================
@@ -334,8 +427,6 @@ def solicitar_codigo():
     methods=["GET", "POST"]
 )
 def admin_login():
-
-    # Si ya inició sesión, no necesita volver al login
 
     if session.get("admin_logged_in"):
 
@@ -409,7 +500,7 @@ def admin_logout():
 
 
 # =========================================================
-# ADMINISTRACIÓN
+# PANEL ADMIN
 # =========================================================
 
 @app.route("/admin")
