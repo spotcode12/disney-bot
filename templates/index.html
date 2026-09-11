@@ -1,344 +1,269 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Ravenplay | Disney+ Code</title>
+    <title>Ravenplay Disney+</title>
 
     <style>
         * {
             box-sizing: border-box;
         }
 
-        :root {
-            --fondo: #080808;
-            --fondo-secundario: #111111;
-            --tarjeta: rgba(25, 25, 25, 0.94);
-            --rojo: #e50914;
-            --rojo-oscuro: #a4060e;
-            --texto: #ffffff;
-            --texto-secundario: #a7a7a7;
-            --borde: rgba(255, 255, 255, 0.08);
-        }
-
         body {
             margin: 0;
+            padding: 20px;
             min-height: 100vh;
-            padding: 24px 15px;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: var(--texto);
-            font-family: Arial, Helvetica, sans-serif;
             background:
-                radial-gradient(
-                    circle at 50% 0%,
-                    rgba(229, 9, 20, 0.16),
-                    transparent 35%
-                ),
-                linear-gradient(
-                    145deg,
-                    #050505,
-                    #121212 55%,
-                    #080808
-                );
-            overflow-x: hidden;
-        }
-
-        .contenedor-principal {
-            width: 100%;
-            max-width: 430px;
-        }
-
-        .marca {
-            text-align: center;
-            margin-bottom: 22px;
-        }
-
-        .marca h1 {
-            margin: 0;
-            font-size: 34px;
-            font-weight: 900;
-            letter-spacing: 5px;
+                radial-gradient(circle at top, #251016 0%, #0d0d0f 45%, #080808 100%);
             color: #ffffff;
-            text-shadow: 0 0 25px rgba(229, 9, 20, 0.25);
-        }
-
-        .marca h1 span {
-            color: var(--rojo);
-        }
-
-        .marca p {
-            margin: 9px 0 0;
-            color: var(--texto-secundario);
-            font-size: 13px;
-            letter-spacing: 1px;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         .contenedor {
             width: 100%;
-            padding: 32px 28px;
-            background: var(--tarjeta);
-            border: 1px solid var(--borde);
-            border-radius: 22px;
-            text-align: center;
-            box-shadow:
-                0 20px 70px rgba(0, 0, 0, 0.55),
-                0 0 35px rgba(229, 9, 20, 0.04);
-            backdrop-filter: blur(12px);
+            max-width: 430px;
         }
 
-        .icono {
-            width: 68px;
-            height: 68px;
-            margin: 0 auto 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 20px;
-            background: linear-gradient(
-                145deg,
-                var(--rojo),
-                var(--rojo-oscuro)
-            );
-            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.25);
-            font-size: 32px;
-        }
-
-        .contenedor h2 {
-            margin: 0;
-            font-size: 23px;
-            font-weight: 700;
-        }
-
-        .descripcion {
-            margin: 10px auto 25px;
-            max-width: 290px;
-            color: var(--texto-secundario);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /* =====================================================
-           CONECTAR SMART TV
-        ===================================================== */
-
-        .seccion-tv {
-            margin: 0 0 26px;
-            padding: 18px 16px;
-            border: 1px solid rgba(229, 9, 20, 0.28);
+        .tarjeta {
+            background: rgba(22, 22, 25, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 14px;
-            background: rgba(229, 9, 20, 0.055);
-            text-align: left;
+            padding: 28px 24px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
         }
 
-        .seccion-tv h3 {
-            margin: 0 0 9px;
-            color: #ffffff;
-            font-size: 16px;
+        .logo {
             text-align: center;
+            margin-bottom: 8px;
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #e50914;
         }
 
-        .seccion-tv p {
-            margin: 0 0 13px;
-            color: #bdbdbd;
+        .subtitulo {
+            text-align: center;
+            color: #aaaaaa;
             font-size: 13px;
-            line-height: 1.6;
-            text-align: center;
+            margin-bottom: 25px;
         }
-
-        .boton-tv {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #444444;
-            border-radius: 11px;
-            background: #242424;
-            color: #ffffff;
-            font-size: 13px;
-            font-weight: 700;
-            text-align: center;
-            text-decoration: none;
-            transition: 0.25s ease;
-        }
-
-        .boton-tv:hover {
-            background: #303030;
-            border-color: var(--rojo);
-            transform: translateY(-2px);
-        }
-
-        .instrucciones-tv {
-            margin-top: 14px;
-            padding: 12px;
-            border-radius: 10px;
-            background: #0d0d0d;
-            border: 1px solid #292929;
-            color: #999999;
-            font-size: 12px;
-            line-height: 1.7;
-        }
-
-        .instrucciones-tv strong {
-            color: #dddddd;
-        }
-
-        .instrucciones-tv ol {
-            margin: 8px 0 0;
-            padding-left: 20px;
-        }
-
-        .instrucciones-tv li {
-            margin-bottom: 4px;
-        }
-
-        /* =====================================================
-           CAMPOS
-        ===================================================== */
 
         .campo {
-            position: relative;
-            margin-top: 14px;
+            margin-bottom: 16px;
+        }
+
+        .campo label {
+            display: block;
+            margin-bottom: 7px;
+            color: #dddddd;
+            font-size: 13px;
+            font-weight: bold;
         }
 
         .campo input {
             width: 100%;
-            padding: 15px 16px;
+            padding: 13px 14px;
             border: 1px solid #333333;
-            border-radius: 11px;
+            border-radius: 8px;
             outline: none;
-            background: #0c0c0c;
+            background: #111113;
             color: #ffffff;
-            font-size: 15px;
-            transition: 0.25s ease;
-        }
-
-        .campo input::placeholder {
-            color: #777777;
+            font-size: 14px;
+            transition: 0.2s;
         }
 
         .campo input:focus {
-            border-color: var(--rojo);
-            box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.12);
+            border-color: #e50914;
+            box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.12);
         }
 
-        button {
+        button,
+        .boton-disney {
             width: 100%;
-            padding: 15px;
-            margin-top: 20px;
             border: none;
-            border-radius: 11px;
-            background: linear-gradient(
-                135deg,
-                var(--rojo),
-                var(--rojo-oscuro)
-            );
-            color: #ffffff;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            border-radius: 8px;
+            padding: 13px;
+            font-size: 13px;
+            font-weight: bold;
             cursor: pointer;
-            transition: 0.25s ease;
-            box-shadow: 0 7px 20px rgba(229, 9, 20, 0.18);
+            text-align: center;
+            text-decoration: none;
+            transition: 0.2s;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(229, 9, 20, 0.3);
+        .boton-principal {
+            background: #e50914;
+            color: #ffffff;
+            margin-top: 4px;
         }
 
-        button:active {
-            transform: translateY(0);
+        .boton-principal:hover {
+            background: #b20710;
+        }
+
+        .boton-secundario {
+            background: #29292d;
+            color: #ffffff;
+            margin-top: 12px;
+        }
+
+        .boton-secundario:hover {
+            background: #3a3a40;
         }
 
         button:disabled {
             opacity: 0.55;
             cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        #solicitar {
-            display: none;
-        }
-
-        #nuevoCodigo {
-            display: none;
-            background: #252525;
-            border: 1px solid #3a3a3a;
-            box-shadow: none;
-        }
-
-        #nuevoCodigo:hover {
-            background: #303030;
-            border-color: #555555;
-            box-shadow: none;
         }
 
         #resultado {
-            margin-top: 22px;
-            min-height: 22px;
-            color: #eeeeee;
-            font-size: 14px;
-            font-weight: 600;
-            line-height: 1.5;
+            margin-top: 18px;
         }
 
-        #codigo {
-            display: none;
-            margin-top: 20px;
-            padding: 18px 10px;
-            border: 1px solid rgba(229, 9, 20, 0.4);
-            border-radius: 13px;
-            background: rgba(229, 9, 20, 0.08);
-            color: #ffffff;
-            font-size: 38px;
-            font-weight: 800;
-            letter-spacing: 8px;
+        .mensaje {
+            padding: 13px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
             text-align: center;
-            text-shadow: 0 0 18px rgba(229, 9, 20, 0.35);
+        }
+
+        .mensaje.exito {
+            background: rgba(35, 160, 80, 0.12);
+            border: 1px solid rgba(35, 160, 80, 0.35);
+            color: #7ee2a8;
+        }
+
+        .mensaje.error {
+            background: rgba(229, 9, 20, 0.12);
+            border: 1px solid rgba(229, 9, 20, 0.35);
+            color: #ff8b91;
         }
 
         .info-cuenta {
             display: none;
             margin-top: 16px;
-            padding: 11px 12px;
-            border-radius: 9px;
-            background: #151515;
-            border: 1px solid #292929;
-            color: #aaaaaa;
+            padding: 14px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             font-size: 13px;
-            overflow-wrap: anywhere;
+            line-height: 1.6;
+            color: #dddddd;
+        }
+
+        .info-cuenta strong {
+            color: #ffffff;
+        }
+
+        .codigo-contenedor {
+            display: none;
+            margin-top: 18px;
+            text-align: center;
+        }
+
+        .codigo-titulo {
+            color: #aaaaaa;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        #codigo {
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: 8px;
+            color: #e50914;
+            padding: 14px;
+            border-radius: 8px;
+            background: #111113;
+            border: 1px solid #333333;
+        }
+
+        .seccion-tv {
+            display: none;
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .boton-tv {
+            background: #202024;
+            color: #ffffff;
+            border: 1px solid #3a3a40;
+        }
+
+        .boton-tv:hover {
+            background: #303036;
+        }
+
+        .instrucciones-tv {
+            display: none;
+            margin-top: 14px;
+            padding: 16px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: left;
+            color: #cccccc;
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+        .instrucciones-tv h3 {
+            margin: 0 0 12px;
+            color: #ffffff;
+            font-size: 15px;
+            text-align: center;
+        }
+
+        .instrucciones-tv ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .instrucciones-tv li {
+            margin-bottom: 7px;
+        }
+
+        .boton-disney {
+            display: block;
+            margin-top: 16px;
+            background: #e50914;
+            color: #ffffff;
+        }
+
+        .boton-disney:hover {
+            background: #b20710;
         }
 
         .pie {
-            margin-top: 22px;
             text-align: center;
-            color: #555555;
+            margin-top: 18px;
+            color: #666666;
             font-size: 11px;
-            letter-spacing: 0.5px;
+        }
+
+        .cargando {
+            opacity: 0.65;
+            pointer-events: none;
         }
 
         @media (max-width: 480px) {
             body {
-                padding: 18px 12px;
+                padding: 12px;
             }
 
-            .marca h1 {
-                font-size: 29px;
-                letter-spacing: 4px;
+            .tarjeta {
+                padding: 24px 18px;
             }
 
-            .contenedor {
-                padding: 28px 20px;
-                border-radius: 18px;
-            }
-
-            #codigo {
-                font-size: 31px;
-                letter-spacing: 6px;
+            .logo {
+                font-size: 27px;
             }
         }
     </style>
@@ -346,405 +271,285 @@
 
 <body>
 
-    <div class="contenedor-principal">
+    <div class="contenedor">
+        <div class="tarjeta">
 
-        <div class="marca">
-            <h1>RAVEN<span>PLAY</span></h1>
-            <p>ENTRETENIMIENTO • SIMPLE • SEGURO</p>
-        </div>
+            <div class="logo">RAVENPLAY</div>
 
-        <div class="contenedor">
-
-            <div class="icono">🎬</div>
-
-            <h2>Acceso a tu perfil</h2>
-
-            <p class="descripcion">
-                Ingresa el nombre de tu perfil y tu PIN
-                para solicitar tu código de acceso.
-            </p>
-
-            <!-- =================================================
-                 CONECTAR SMART TV
-            ================================================== -->
-
-            <div class="seccion-tv">
-
-                <h3>📺 ¿Quieres conectar tu Smart TV?</h3>
-
-                <p>
-                    Activa tu TV desde la página oficial de Disney+
-                    usando el código que aparece en pantalla.
-                </p>
-
-                <a
-                    class="boton-tv"
-                    href="https://www.disneyplus.com/begin"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    📺 CONECTAR MI TV
-                </a>
-
-                <div class="instrucciones-tv">
-
-                    <strong>Instrucciones:</strong>
-
-                    <ol>
-                        <li>
-                            Abre Disney+ en tu Smart TV.
-                        </li>
-
-                        <li>
-                            Selecciona
-                            <strong>Iniciar sesión</strong>.
-                        </li>
-
-                        <li>
-                            Busca el código de 8 dígitos
-                            que aparece en la TV.
-                        </li>
-
-                        <li>
-                            Presiona
-                            <strong>Conectar mi TV</strong>.
-                        </li>
-
-                        <li>
-                            Coloca el código de tu TV
-                            en la página oficial.
-                        </li>
-
-                        <li>
-                            Ingresa el correo de la cuenta Disney+.
-                        </li>
-
-                        <li>
-                            Si aparece la opción
-                            <strong>Enviar código de un solo uso</strong>,
-                            selecciónala.
-                        </li>
-
-                        <li>
-                            Revisa el correo y coloca el código temporal
-                            de 6 dígitos que recibas.
-                        </li>
-                    </ol>
-
-                </div>
-
+            <div class="subtitulo">
+                Acceso seguro a tu perfil Disney+
             </div>
 
-            <!-- =================================================
-                 PERFIL
-            ================================================== -->
-
             <div class="campo">
+                <label for="nombre">Nombre del perfil</label>
                 <input
                     type="text"
                     id="nombre"
-                    placeholder="Nombre del perfil"
+                    placeholder="Ingresa el nombre del perfil"
                     autocomplete="off"
                 >
             </div>
 
-            <!-- =================================================
-                 PIN
-            ================================================== -->
-
             <div class="campo">
+                <label for="pin">PIN del perfil</label>
                 <input
                     type="password"
                     id="pin"
-                    placeholder="PIN del perfil"
-                    inputmode="numeric"
+                    placeholder="Ingresa el PIN"
+                    maxlength="6"
                     autocomplete="off"
                 >
             </div>
 
-            <!-- =================================================
-                 VERIFICAR
-            ================================================== -->
-
             <button
+                type="button"
                 id="verificar"
-                onclick="verificarPerfil()"
-            >
+                class="boton-principal"
+                onclick="verificarPerfil()">
                 VERIFICAR PERFIL
             </button>
 
-            <!-- =================================================
-                 SOLICITAR PRIMER CÓDIGO
-            ================================================== -->
+            <div id="resultado"></div>
+
+            <div id="infoCuenta" class="info-cuenta"></div>
+
+            <div id="seccionTV" class="seccion-tv">
+
+                <button
+                    type="button"
+                    class="boton-tv"
+                    onclick="mostrarInstruccionesTV()">
+                    📺 CONECTAR TV
+                </button>
+
+                <div id="instruccionesTV" class="instrucciones-tv">
+
+                    <h3>¿Cómo conectar tu Smart TV?</h3>
+
+                    <ol>
+                        <li>Abre la aplicación Disney+ en tu Smart TV.</li>
+                        <li>Selecciona la opción <strong>Iniciar sesión</strong>.</li>
+                        <li>En la pantalla de tu TV aparecerá un código de activación.</li>
+                        <li>Presiona el botón de abajo para abrir la página oficial.</li>
+                        <li>Ingresa el código que aparece en tu televisor.</li>
+                        <li>Continúa con el correo de la cuenta.</li>
+                        <li>Si Disney+ muestra la opción de enviar un código de un solo uso, selecciónala.</li>
+                        <li>Revisa el correo e ingresa el código temporal solicitado.</li>
+                    </ol>
+
+                    <a
+                        href="https://www.disneyplus.com/begin"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="boton-disney">
+                        🌐 IR A DISNEYPLUS.COM/BEGIN
+                    </a>
+
+                </div>
+            </div>
+
+            <div id="codigoContenedor" class="codigo-contenedor">
+
+                <div class="codigo-titulo">
+                    Tu código de acceso es:
+                </div>
+
+                <div id="codigo"></div>
+
+                <button
+                    type="button"
+                    id="nuevoCodigo"
+                    class="boton-secundario"
+                    onclick="solicitarNuevoCodigo()">
+                    SOLICITAR NUEVO CÓDIGO
+                </button>
+
+            </div>
 
             <button
+                type="button"
                 id="solicitar"
-                onclick="solicitarCodigo()"
-            >
+                class="boton-principal"
+                style="display: none;"
+                onclick="solicitarCodigo()">
                 SOLICITAR CÓDIGO
             </button>
 
-            <!-- =================================================
-                 CUENTA
-            ================================================== -->
-
-            <div
-                id="infoCuenta"
-                class="info-cuenta"
-            ></div>
-
-            <!-- =================================================
-                 MENSAJE
-            ================================================== -->
-
-            <div id="resultado"></div>
-
-            <!-- =================================================
-                 CÓDIGO
-            ================================================== -->
-
-            <div id="codigo"></div>
-
-            <!-- =================================================
-                 RECARGAR PÁGINA
-            ================================================== -->
-
-            <button
-                id="nuevoCodigo"
-                onclick="solicitarNuevoCodigo()"
-            >
-                🔄 SOLICITAR OTRO CÓDIGO
-            </button>
+            <div class="pie">
+                Ravenplay © Todos los derechos reservados
+            </div>
 
         </div>
-
-        <div class="pie">
-            © Ravenplay — Todos los derechos reservados
-        </div>
-
     </div>
 
     <script>
-
-        // ========================================================
-        // OCULTAR DOMINIO DEL CORREO
-        // ========================================================
-
-        function ocultarDominio(correo) {
-
-            if (!correo || !correo.includes("@")) {
-                return correo;
-            }
-
-            const partes = correo.split("@");
-            const usuario = partes[0];
-            const dominio = partes[1];
-
-            const posicionPunto = dominio.lastIndexOf(".");
-
-            if (posicionPunto > 0) {
-
-                const extension = dominio.substring(
-                    posicionPunto
-                );
-
-                return usuario + "@**************" + extension;
-            }
-
-            return usuario + "@**************";
-        }
-
-
-        // ========================================================
-        // VERIFICAR PERFIL
-        // ========================================================
+        let perfilVerificado = false;
 
         async function verificarPerfil() {
+            const nombre = document.getElementById("nombre").value.trim();
+            const pin = document.getElementById("pin").value.trim();
 
-            const nombre =
-                document.getElementById("nombre").value.trim();
-
-            const pin =
-                document.getElementById("pin").value.trim();
-
-            const resultado =
-                document.getElementById("resultado");
-
-            const boton =
-                document.getElementById("verificar");
-
-            const solicitar =
-                document.getElementById("solicitar");
-
-            const nuevoCodigo =
-                document.getElementById("nuevoCodigo");
-
-            const codigo =
-                document.getElementById("codigo");
-
-            const infoCuenta =
-                document.getElementById("infoCuenta");
-
-            solicitar.style.display = "none";
-            nuevoCodigo.style.display = "none";
-            codigo.style.display = "none";
-            infoCuenta.style.display = "none";
+            const resultado = document.getElementById("resultado");
+            const botonVerificar = document.getElementById("verificar");
+            const seccionTV = document.getElementById("seccionTV");
+            const instruccionesTV = document.getElementById("instruccionesTV");
+            const solicitar = document.getElementById("solicitar");
+            const codigoContenedor = document.getElementById("codigoContenedor");
+            const infoCuenta = document.getElementById("infoCuenta");
 
             if (!nombre || !pin) {
-
-                resultado.textContent =
-                    "❌ Completa ambos campos.";
-
+                resultado.innerHTML = `
+                    <div class="mensaje error">
+                        Ingresa el nombre del perfil y el PIN.
+                    </div>
+                `;
                 return;
             }
 
-            boton.disabled = true;
+            botonVerificar.disabled = true;
+            botonVerificar.classList.add("cargando");
+            botonVerificar.textContent = "VERIFICANDO...";
 
-            resultado.textContent =
-                "⏳ Verificando...";
+            resultado.innerHTML = "";
+            infoCuenta.style.display = "none";
+            solicitar.style.display = "none";
+            codigoContenedor.style.display = "none";
+            seccionTV.style.display = "none";
+            instruccionesTV.style.display = "none";
 
             try {
+                const respuesta = await fetch("/verificar-perfil", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        pin: pin
+                    })
+                });
 
-                const respuesta =
-                    await fetch("/verificar-perfil", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            nombre: nombre,
-                            pin: pin
-                        })
-                    });
+                const data = await respuesta.json();
 
-                const datos = await respuesta.json();
+                if (data.success) {
+                    perfilVerificado = true;
 
-                if (datos.ok) {
+                    resultado.innerHTML = `
+                        <div class="mensaje exito">
+                            ✅ Perfil verificado correctamente.
+                        </div>
+                    `;
 
-                    resultado.textContent =
-                        "✅ Perfil verificado";
-
-                    if (datos.correo) {
-
-                        infoCuenta.textContent =
-                            "📧 Cuenta: "
-                            + ocultarDominio(datos.correo);
+                    if (data.cuenta) {
+                        infoCuenta.innerHTML = `
+                            <strong>Cuenta:</strong> ${data.cuenta}
+                        `;
 
                         infoCuenta.style.display = "block";
                     }
 
-                    boton.style.display = "none";
                     solicitar.style.display = "block";
+                    seccionTV.style.display = "block";
 
                 } else {
+                    perfilVerificado = false;
 
-                    resultado.textContent =
-                        "❌ " + datos.mensaje;
-
-                    boton.disabled = false;
+                    resultado.innerHTML = `
+                        <div class="mensaje error">
+                            ❌ ${data.message || "No se pudo verificar el perfil."}
+                        </div>
+                    `;
                 }
 
             } catch (error) {
+                resultado.innerHTML = `
+                    <div class="mensaje error">
+                        ❌ Error de conexión. Inténtalo nuevamente.
+                    </div>
+                `;
 
-                console.error(error);
-
-                resultado.textContent =
-                    "❌ Error de conexión.";
-
-                boton.disabled = false;
+            } finally {
+                botonVerificar.disabled = false;
+                botonVerificar.classList.remove("cargando");
+                botonVerificar.textContent = "VERIFICAR PERFIL";
             }
         }
-
-
-        // ========================================================
-        // SOLICITAR ÚLTIMO CÓDIGO
-        // ========================================================
 
         async function solicitarCodigo() {
+            const resultado = document.getElementById("resultado");
+            const solicitar = document.getElementById("solicitar");
+            const codigoContenedor = document.getElementById("codigoContenedor");
+            const codigo = document.getElementById("codigo");
 
-            const nombre =
-                document.getElementById("nombre").value.trim();
+            if (!perfilVerificado) {
+                resultado.innerHTML = `
+                    <div class="mensaje error">
+                        Primero debes verificar el perfil.
+                    </div>
+                `;
+                return;
+            }
 
-            const pin =
-                document.getElementById("pin").value.trim();
-
-            const resultado =
-                document.getElementById("resultado");
-
-            const boton =
-                document.getElementById("solicitar");
-
-            const nuevoCodigo =
-                document.getElementById("nuevoCodigo");
-
-            const codigo =
-                document.getElementById("codigo");
-
-            boton.disabled = true;
-
-            nuevoCodigo.style.display = "none";
-            codigo.style.display = "none";
-
-            resultado.textContent =
-                "⏳ Buscando último código...";
+            solicitar.disabled = true;
+            solicitar.classList.add("cargando");
+            solicitar.textContent = "SOLICITANDO...";
 
             try {
+                const respuesta = await fetch("/solicitar-codigo", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
 
-                const respuesta =
-                    await fetch("/solicitar-codigo", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            nombre: nombre,
-                            pin: pin
-                        })
-                    });
+                const data = await respuesta.json();
 
-                const datos = await respuesta.json();
+                if (data.success) {
+                    resultado.innerHTML = `
+                        <div class="mensaje exito">
+                            ✅ Código obtenido correctamente.
+                        </div>
+                    `;
 
-                if (datos.ok) {
-
-                    resultado.textContent =
-                        "✅ Código encontrado";
-
-                    codigo.textContent =
-                        datos.codigo;
-
-                    codigo.style.display = "block";
-                    nuevoCodigo.style.display = "block";
+                    codigo.textContent = data.codigo;
+                    codigoContenedor.style.display = "block";
 
                 } else {
-
-                    resultado.textContent =
-                        "❌ " + datos.mensaje;
+                    resultado.innerHTML = `
+                        <div class="mensaje error">
+                            ❌ ${data.message || "No se pudo obtener el código."}
+                        </div>
+                    `;
                 }
 
             } catch (error) {
+                resultado.innerHTML = `
+                    <div class="mensaje error">
+                        ❌ Error de conexión. Inténtalo nuevamente.
+                    </div>
+                `;
 
-                console.error(error);
-
-                resultado.textContent =
-                    "❌ Error de conexión.";
+            } finally {
+                solicitar.disabled = false;
+                solicitar.classList.remove("cargando");
+                solicitar.textContent = "SOLICITAR CÓDIGO";
             }
-
-            boton.disabled = false;
         }
 
-
-        // ========================================================
-        // RECARGAR PÁGINA PARA INTENTAR NUEVAMENTE
-        // ========================================================
-
-        function solicitarNuevoCodigo() {
-
-            window.location.reload();
-
+        async function solicitarNuevoCodigo() {
+            await solicitarCodigo();
         }
 
+        function mostrarInstruccionesTV() {
+            const instrucciones = document.getElementById("instruccionesTV");
+
+            if (instrucciones.style.display === "block") {
+                instrucciones.style.display = "none";
+            } else {
+                instrucciones.style.display = "block";
+            }
+        }
     </script>
 
 </body>
-
 </html>
