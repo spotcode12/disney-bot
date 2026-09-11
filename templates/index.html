@@ -383,173 +383,217 @@
     </div>
 
     <script>
-        let perfilVerificado = false;
+    let perfilVerificado = false;
 
-        async function verificarPerfil() {
-            const nombre = document.getElementById("nombre").value.trim();
-            const pin = document.getElementById("pin").value.trim();
+    async function verificarPerfil() {
+        const nombre = document.getElementById("nombre").value.trim();
+        const pin = document.getElementById("pin").value.trim();
 
-            const resultado = document.getElementById("resultado");
-            const botonVerificar = document.getElementById("verificar");
-            const seccionTV = document.getElementById("seccionTV");
-            const instruccionesTV = document.getElementById("instruccionesTV");
-            const solicitar = document.getElementById("solicitar");
-            const codigoContenedor = document.getElementById("codigoContenedor");
-            const infoCuenta = document.getElementById("infoCuenta");
+        const resultado = document.getElementById("resultado");
+        const botonVerificar = document.getElementById("verificar");
+        const seccionTV = document.getElementById("seccionTV");
+        const instruccionesTV = document.getElementById("instruccionesTV");
+        const solicitar = document.getElementById("solicitar");
+        const codigoContenedor = document.getElementById("codigoContenedor");
+        const infoCuenta = document.getElementById("infoCuenta");
 
-            if (!nombre || !pin) {
+        if (!nombre || !pin) {
+            resultado.innerHTML = `
+                <div class="mensaje error">
+                    ❌ Ingresa el nombre del perfil y el PIN.
+                </div>
+            `;
+            return;
+        }
+
+        botonVerificar.disabled = true;
+        botonVerificar.classList.add("cargando");
+        botonVerificar.textContent = "VERIFICANDO...";
+
+        resultado.innerHTML = "";
+        infoCuenta.style.display = "none";
+        solicitar.style.display = "none";
+        codigoContenedor.style.display = "none";
+        seccionTV.style.display = "none";
+        instruccionesTV.style.display = "none";
+
+        perfilVerificado = false;
+
+        try {
+            const respuesta = await fetch("/verificar-perfil", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    nombre: nombre,
+                    pin: pin
+                })
+            });
+
+            const data = await respuesta.json();
+
+            // Diagnóstico: muestra en la consola lo que devuelve Flask
+            console.log("Respuesta del servidor:", data);
+
+            /*
+             * Aceptamos diferentes nombres por si el backend devuelve:
+             * success, ok, verificado o exito.
+             */
+            const verificacionCorrecta =
+                data.success === true ||
+                data.ok === true ||
+                data.verificado === true ||
+                data.exito === true;
+
+            if (verificacionCorrecta) {
+                perfilVerificado = true;
+
                 resultado.innerHTML = `
-                    <div class="mensaje error">
-                        Ingresa el nombre del perfil y el PIN.
+                    <div class="mensaje exito">
+                        ✅ Perfil verificado correctamente.
                     </div>
                 `;
-                return;
-            }
 
-            botonVerificar.disabled = true;
-            botonVerificar.classList.add("cargando");
-            botonVerificar.textContent = "VERIFICANDO...";
+                /*
+                 * El backend podría devolver la cuenta como:
+                 * cuenta, correo o email.
+                 */
+                const cuenta =
+                    data.cuenta ||
+                    data.correo ||
+                    data.email ||
+                    "";
 
-            resultado.innerHTML = "";
-            infoCuenta.style.display = "none";
-            solicitar.style.display = "none";
-            codigoContenedor.style.display = "none";
-            seccionTV.style.display = "none";
-            instruccionesTV.style.display = "none";
-
-            try {
-                const respuesta = await fetch("/verificar-perfil", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        nombre: nombre,
-                        pin: pin
-                    })
-                });
-
-                const data = await respuesta.json();
-
-                if (data.success) {
-                    perfilVerificado = true;
-
-                    resultado.innerHTML = `
-                        <div class="mensaje exito">
-                            ✅ Perfil verificado correctamente.
-                        </div>
+                if (cuenta) {
+                    infoCuenta.innerHTML = `
+                        <strong>Cuenta:</strong> ${cuenta}
                     `;
 
-                    if (data.cuenta) {
-                        infoCuenta.innerHTML = `
-                            <strong>Cuenta:</strong> ${data.cuenta}
-                        `;
-
-                        infoCuenta.style.display = "block";
-                    }
-
-                    solicitar.style.display = "block";
-                    seccionTV.style.display = "block";
-
-                } else {
-                    perfilVerificado = false;
-
-                    resultado.innerHTML = `
-                        <div class="mensaje error">
-                            ❌ ${data.message || "No se pudo verificar el perfil."}
-                        </div>
-                    `;
+                    infoCuenta.style.display = "block";
                 }
 
-            } catch (error) {
-                resultado.innerHTML = `
-                    <div class="mensaje error">
-                        ❌ Error de conexión. Inténtalo nuevamente.
-                    </div>
-                `;
+                // Mostrar los botones después de verificar
+                solicitar.style.display = "block";
+                seccionTV.style.display = "block";
 
-            } finally {
-                botonVerificar.disabled = false;
-                botonVerificar.classList.remove("cargando");
-                botonVerificar.textContent = "VERIFICAR PERFIL";
-            }
-        }
-
-        async function solicitarCodigo() {
-            const resultado = document.getElementById("resultado");
-            const solicitar = document.getElementById("solicitar");
-            const codigoContenedor = document.getElementById("codigoContenedor");
-            const codigo = document.getElementById("codigo");
-
-            if (!perfilVerificado) {
-                resultado.innerHTML = `
-                    <div class="mensaje error">
-                        Primero debes verificar el perfil.
-                    </div>
-                `;
-                return;
-            }
-
-            solicitar.disabled = true;
-            solicitar.classList.add("cargando");
-            solicitar.textContent = "SOLICITANDO...";
-
-            try {
-                const respuesta = await fetch("/solicitar-codigo", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                });
-
-                const data = await respuesta.json();
-
-                if (data.success) {
-                    resultado.innerHTML = `
-                        <div class="mensaje exito">
-                            ✅ Código obtenido correctamente.
-                        </div>
-                    `;
-
-                    codigo.textContent = data.codigo;
-                    codigoContenedor.style.display = "block";
-
-                } else {
-                    resultado.innerHTML = `
-                        <div class="mensaje error">
-                            ❌ ${data.message || "No se pudo obtener el código."}
-                        </div>
-                    `;
-                }
-
-            } catch (error) {
-                resultado.innerHTML = `
-                    <div class="mensaje error">
-                        ❌ Error de conexión. Inténtalo nuevamente.
-                    </div>
-                `;
-
-            } finally {
-                solicitar.disabled = false;
-                solicitar.classList.remove("cargando");
-                solicitar.textContent = "SOLICITAR CÓDIGO";
-            }
-        }
-
-        async function solicitarNuevoCodigo() {
-            await solicitarCodigo();
-        }
-
-        function mostrarInstruccionesTV() {
-            const instrucciones = document.getElementById("instruccionesTV");
-
-            if (instrucciones.style.display === "block") {
-                instrucciones.style.display = "none";
             } else {
-                instrucciones.style.display = "block";
+                perfilVerificado = false;
+
+                resultado.innerHTML = `
+                    <div class="mensaje error">
+                        ❌ ${data.message || data.mensaje || "No se pudo verificar el perfil."}
+                    </div>
+                `;
             }
+
+        } catch (error) {
+            console.error("Error al verificar el perfil:", error);
+
+            resultado.innerHTML = `
+                <div class="mensaje error">
+                    ❌ Error de conexión. Inténtalo nuevamente.
+                </div>
+            `;
+
+        } finally {
+            botonVerificar.disabled = false;
+            botonVerificar.classList.remove("cargando");
+            botonVerificar.textContent = "VERIFICAR PERFIL";
         }
-    </script>
+    }
+
+
+    async function solicitarCodigo() {
+        const resultado = document.getElementById("resultado");
+        const solicitar = document.getElementById("solicitar");
+        const codigoContenedor = document.getElementById("codigoContenedor");
+        const codigo = document.getElementById("codigo");
+
+        if (!perfilVerificado) {
+            resultado.innerHTML = `
+                <div class="mensaje error">
+                    ❌ Primero debes verificar el perfil.
+                </div>
+            `;
+            return;
+        }
+
+        solicitar.disabled = true;
+        solicitar.classList.add("cargando");
+        solicitar.textContent = "SOLICITANDO...";
+
+        try {
+            const respuesta = await fetch("/solicitar-codigo", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const data = await respuesta.json();
+
+            console.log("Respuesta al solicitar código:", data);
+
+            if (
+                data.success === true ||
+                data.ok === true ||
+                data.exito === true
+            ) {
+                resultado.innerHTML = `
+                    <div class="mensaje exito">
+                        ✅ Código obtenido correctamente.
+                    </div>
+                `;
+
+                codigo.textContent =
+                    data.codigo ||
+                    data.code ||
+                    data.codigo_acceso ||
+                    "------";
+
+                codigoContenedor.style.display = "block";
+
+            } else {
+                resultado.innerHTML = `
+                    <div class="mensaje error">
+                        ❌ ${data.message || data.mensaje || "No se pudo obtener el código."}
+                    </div>
+                `;
+            }
+
+        } catch (error) {
+            console.error("Error al solicitar código:", error);
+
+            resultado.innerHTML = `
+                <div class="mensaje error">
+                    ❌ Error de conexión. Inténtalo nuevamente.
+                </div>
+            `;
+
+        } finally {
+            solicitar.disabled = false;
+            solicitar.classList.remove("cargando");
+            solicitar.textContent = "SOLICITAR CÓDIGO";
+        }
+    }
+
+
+    async function solicitarNuevoCodigo() {
+        await solicitarCodigo();
+    }
+
+
+    function mostrarInstruccionesTV() {
+        const instrucciones = document.getElementById("instruccionesTV");
+
+        if (instrucciones.style.display === "block") {
+            instrucciones.style.display = "none";
+        } else {
+            instrucciones.style.display = "block";
+        }
+    }
+</script>
 
 </body>
 </html>
