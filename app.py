@@ -136,7 +136,7 @@ def verificar():
     perfil_id = perfil[0]
     cuenta_id = perfil[1]
     nombre_perfil = perfil[2]
-    correo_cuenta = perfil[3]
+    correo_cuenta = perfil[5]
 
     print(
         f"✅ Perfil verificado: "
@@ -545,12 +545,11 @@ def admin_lista_perfiles(cuenta_id):
     lista = []
 
     for perfil in perfiles:
-
-        lista.append({
-            "id": perfil[0],
-            "nombre": perfil[1],
-            "activo": bool(perfil[3])
-        })
+    lista.append({
+        "id": perfil[0],
+        "nombre": perfil[2],
+        "activo": bool(perfil[4])
+    })
 
     return jsonify({
         "ok": True,
