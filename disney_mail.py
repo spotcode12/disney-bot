@@ -178,7 +178,6 @@ def extraer_codigo(mensaje):
         r"(?:code|zugangscode|bestätigung).*?\b(\d{6})\b"
     ]
 
-
     # HTML
     for patron in patrones:
 
@@ -192,7 +191,6 @@ def extraer_codigo(mensaje):
 
             return resultado.group(1)
 
-
     # Texto plano
     for patron in patrones:
 
@@ -205,7 +203,6 @@ def extraer_codigo(mensaje):
         if resultado:
 
             return resultado.group(1)
-
 
     # Respaldo
     texto_completo = (
@@ -222,7 +219,6 @@ def extraer_codigo(mensaje):
     if codigos:
 
         return codigos[0]
-
 
     return None
 
@@ -268,10 +264,6 @@ def correo_pertenece_a_cuenta(
     if not correo_cuenta:
         return False
 
-
-    # Headers donde Zoho puede conservar
-    # el destinatario original.
-
     headers = [
 
         mensaje.get("To"),
@@ -282,7 +274,6 @@ def correo_pertenece_a_cuenta(
         mensaje.get("Cc")
     ]
 
-
     for header in headers:
 
         if not header:
@@ -292,11 +283,9 @@ def correo_pertenece_a_cuenta(
             header
         ).lower()
 
-        # Buscamos el correo exacto
         if correo_cuenta in header_decodificado:
 
             return True
-
 
     return False
 
@@ -320,11 +309,9 @@ def obtener_ids_codigos(
 
         return set()
 
-
     ids = datos[0].split()
 
     ids_codigo = set()
-
 
     palabras_codigo = [
 
@@ -344,18 +331,18 @@ def obtener_ids_codigos(
         "bestätigung"
     ]
 
-
     for correo_id in ids:
 
         estado, datos = mail.fetch(
             correo_id,
-            "(BODY.PEEK[HEADER.FIELDS (FROM TO CC SUBJECT DELIVERED-TO X-ORIGINAL-TO X-ENVELOPE-TO)])"
+            "(BODY.PEEK[HEADER.FIELDS "
+            "(FROM TO CC SUBJECT DELIVERED-TO "
+            "X-ORIGINAL-TO X-ENVELOPE-TO)])"
         )
 
         if estado != "OK":
 
             continue
-
 
         try:
 
@@ -363,11 +350,7 @@ def obtener_ids_codigos(
                 datos[0][1]
             )
 
-
-            # -----------------------------------------
-            # COMPROBAR DESTINATARIO
-            # -----------------------------------------
-
+            # Comprobar destinatario
             if not correo_pertenece_a_cuenta(
                 mensaje,
                 correo_cuenta
@@ -375,17 +358,12 @@ def obtener_ids_codigos(
 
                 continue
 
-
-            # -----------------------------------------
-            # COMPROBAR ASUNTO
-            # -----------------------------------------
-
+            # Comprobar asunto
             asunto = decodificar(
                 mensaje["Subject"]
             )
 
             asunto_lower = asunto.lower()
-
 
             if any(
                 palabra in asunto_lower
@@ -396,7 +374,6 @@ def obtener_ids_codigos(
                     correo_id
                 )
 
-
         except Exception as error:
 
             print(
@@ -405,7 +382,6 @@ def obtener_ids_codigos(
             )
 
             continue
-
 
     return ids_codigo
 
@@ -427,7 +403,6 @@ def obtener_codigo_disney(
         "PASSWORD"
     )
 
-
     if not email_usuario or not password:
 
         print(
@@ -442,7 +417,6 @@ def obtener_codigo_disney(
 
         return None
 
-
     print(
         f"📨 Buzón único: {email_usuario}"
     )
@@ -452,38 +426,40 @@ def obtener_codigo_disney(
         f"{correo_cuenta}"
     )
 
-
-    mail = imaplib.IMAP4_SSL(
-        IMAP_SERVER,
-        IMAP_PORT
-    )
-
+    mail = None
 
     try:
 
-        # -----------------------------------------
+        # -------------------------------------------------
+        # CONEXIÓN IMAP CON TIEMPO MÁXIMO DE ESPERA
+        # -------------------------------------------------
+
+        mail = imaplib.IMAP4_SSL(
+            IMAP_SERVER,
+            IMAP_PORT,
+            timeout=20
+        )
+
+        # -------------------------------------------------
         # LOGIN
-        # -----------------------------------------
+        # -------------------------------------------------
 
         mail.login(
             email_usuario,
             password
         )
 
-
         mail.select("INBOX")
 
-
-        # -----------------------------------------
+        # -------------------------------------------------
         # BUSCAR CÓDIGOS EXISTENTES
         # DE ESTA CUENTA
-        # -----------------------------------------
+        # -------------------------------------------------
 
         ids_anteriores = obtener_ids_codigos(
             mail,
             correo_cuenta
         )
-
 
         print(
             f"📌 Códigos existentes de "
@@ -491,11 +467,9 @@ def obtener_codigo_disney(
             f"{len(ids_anteriores)}"
         )
 
-
         # =================================================
         # PRIMERO:
         # DEVOLVER EL ÚLTIMO CÓDIGO EXISTENTE
-        # DE ESA CUENTA
         # =================================================
 
         if ids_anteriores:
@@ -505,18 +479,15 @@ def obtener_codigo_disney(
                 key=lambda x: int(x)
             )
 
-
             print(
                 f"🔎 Revisando último correo "
                 f"de la cuenta: {ultimo_id}"
             )
 
-
             estado, datos = mail.fetch(
                 ultimo_id,
                 "(RFC822)"
             )
-
 
             if estado == "OK":
 
@@ -524,11 +495,9 @@ def obtener_codigo_disney(
                     datos[0][1]
                 )
 
-
                 codigo = extraer_codigo(
                     mensaje
                 )
-
 
                 if codigo:
 
@@ -538,7 +507,6 @@ def obtener_codigo_disney(
                     )
 
                     return codigo
-
 
         # =================================================
         # SI NO HAY CÓDIGO:
@@ -553,78 +521,59 @@ def obtener_codigo_disney(
 
             return None
 
-
         tiempo_maximo = 60
-
         intervalo = 1
-
         transcurrido = 0
-
 
         print(
             "⏳ Esperando nuevo código..."
         )
 
-
         while transcurrido < tiempo_maximo:
-
 
             print(
                 f"⏳ {transcurrido}/"
                 f"{tiempo_maximo}s"
             )
 
-
             mail.select("INBOX")
-
 
             ids_actuales = obtener_ids_codigos(
                 mail,
                 correo_cuenta
             )
 
-
             ids_nuevos = (
                 ids_actuales
                 - ids_anteriores
             )
 
-
             if ids_nuevos:
-
 
                 ultimo_id = max(
                     ids_nuevos,
                     key=lambda x: int(x)
                 )
 
-
                 print(
                     f"📩 Nuevo correo encontrado: "
                     f"{ultimo_id}"
                 )
-
 
                 estado, datos = mail.fetch(
                     ultimo_id,
                     "(RFC822)"
                 )
 
-
                 if estado == "OK":
 
-
-                    mensaje = (
-                        email.message_from_bytes(
-                            datos[0][1]
-                        )
+                    mensaje = email.message_from_bytes(
+                        datos[0][1]
                     )
-
 
                     codigo = extraer_codigo(
                         mensaje
                     )
-
 
                     if codigo:
 
@@ -634,9 +583,7 @@ def obtener_codigo_disney(
                             f"{codigo}"
                         )
 
-
                         return codigo
-
 
             time.sleep(
                 intervalo
@@ -644,13 +591,11 @@ def obtener_codigo_disney(
 
             transcurrido += intervalo
 
-
         print(
             "⏰ Tiempo agotado."
         )
 
         return None
-
 
     except Exception as error:
 
@@ -660,16 +605,29 @@ def obtener_codigo_disney(
 
         return None
 
-
     finally:
 
-        try:
+        # -------------------------------------------------
+        # CERRAR CORRECTAMENTE LA CONEXIÓN
+        # -------------------------------------------------
 
-            mail.logout()
+        if mail is not None:
 
-        except:
+            try:
 
-            pass
+                mail.close()
+
+            except Exception:
+
+                pass
+
+            try:
+
+                mail.logout()
+
+            except Exception:
+
+                pass
 
 
 # =========================================================
@@ -682,7 +640,6 @@ if __name__ == "__main__":
         "📧 Correo de la cuenta Disney+: "
     ).strip()
 
-
     if not correo_prueba:
 
         print(
@@ -694,7 +651,6 @@ if __name__ == "__main__":
         codigo = obtener_codigo_disney(
             correo_prueba
         )
-
 
         if codigo:
 
