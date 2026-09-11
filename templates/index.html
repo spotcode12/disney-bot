@@ -121,6 +121,83 @@
             line-height: 1.6;
         }
 
+        /* =====================================================
+           CONECTAR SMART TV
+        ===================================================== */
+
+        .seccion-tv {
+            margin: 0 0 26px;
+            padding: 18px 16px;
+            border: 1px solid rgba(229, 9, 20, 0.28);
+            border-radius: 14px;
+            background: rgba(229, 9, 20, 0.055);
+            text-align: left;
+        }
+
+        .seccion-tv h3 {
+            margin: 0 0 9px;
+            color: #ffffff;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .seccion-tv p {
+            margin: 0 0 13px;
+            color: #bdbdbd;
+            font-size: 13px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .boton-tv {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #444444;
+            border-radius: 11px;
+            background: #242424;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            transition: 0.25s ease;
+        }
+
+        .boton-tv:hover {
+            background: #303030;
+            border-color: var(--rojo);
+            transform: translateY(-2px);
+        }
+
+        .instrucciones-tv {
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #0d0d0d;
+            border: 1px solid #292929;
+            color: #999999;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .instrucciones-tv strong {
+            color: #dddddd;
+        }
+
+        .instrucciones-tv ol {
+            margin: 8px 0 0;
+            padding-left: 20px;
+        }
+
+        .instrucciones-tv li {
+            margin-bottom: 4px;
+        }
+
+        /* =====================================================
+           CAMPOS
+        ===================================================== */
+
         .campo {
             position: relative;
             margin-top: 14px;
@@ -287,7 +364,81 @@
                 para solicitar tu código de acceso.
             </p>
 
-            <!-- PERFIL -->
+            <!-- =================================================
+                 CONECTAR SMART TV
+            ================================================== -->
+
+            <div class="seccion-tv">
+
+                <h3>📺 ¿Quieres conectar tu Smart TV?</h3>
+
+                <p>
+                    Activa tu TV desde la página oficial de Disney+
+                    usando el código que aparece en pantalla.
+                </p>
+
+                <a
+                    class="boton-tv"
+                    href="https://www.disneyplus.com/begin"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    📺 CONECTAR MI TV
+                </a>
+
+                <div class="instrucciones-tv">
+
+                    <strong>Instrucciones:</strong>
+
+                    <ol>
+                        <li>
+                            Abre Disney+ en tu Smart TV.
+                        </li>
+
+                        <li>
+                            Selecciona
+                            <strong>Iniciar sesión</strong>.
+                        </li>
+
+                        <li>
+                            Busca el código de 8 dígitos
+                            que aparece en la TV.
+                        </li>
+
+                        <li>
+                            Presiona
+                            <strong>Conectar mi TV</strong>.
+                        </li>
+
+                        <li>
+                            Coloca el código de tu TV
+                            en la página oficial.
+                        </li>
+
+                        <li>
+                            Ingresa el correo de la cuenta Disney+.
+                        </li>
+
+                        <li>
+                            Si aparece la opción
+                            <strong>Enviar código de un solo uso</strong>,
+                            selecciónala.
+                        </li>
+
+                        <li>
+                            Revisa el correo y coloca el código temporal
+                            de 6 dígitos que recibas.
+                        </li>
+                    </ol>
+
+                </div>
+
+            </div>
+
+            <!-- =================================================
+                 PERFIL
+            ================================================== -->
+
             <div class="campo">
                 <input
                     type="text"
@@ -297,7 +448,10 @@
                 >
             </div>
 
-            <!-- PIN -->
+            <!-- =================================================
+                 PIN
+            ================================================== -->
+
             <div class="campo">
                 <input
                     type="password"
@@ -308,7 +462,10 @@
                 >
             </div>
 
-            <!-- VERIFICAR -->
+            <!-- =================================================
+                 VERIFICAR
+            ================================================== -->
+
             <button
                 id="verificar"
                 onclick="verificarPerfil()"
@@ -316,7 +473,10 @@
                 VERIFICAR PERFIL
             </button>
 
-            <!-- SOLICITAR PRIMER CÓDIGO -->
+            <!-- =================================================
+                 SOLICITAR PRIMER CÓDIGO
+            ================================================== -->
+
             <button
                 id="solicitar"
                 onclick="solicitarCodigo()"
@@ -324,19 +484,31 @@
                 SOLICITAR CÓDIGO
             </button>
 
-            <!-- CUENTA -->
+            <!-- =================================================
+                 CUENTA
+            ================================================== -->
+
             <div
                 id="infoCuenta"
                 class="info-cuenta"
             ></div>
 
-            <!-- MENSAJE -->
+            <!-- =================================================
+                 MENSAJE
+            ================================================== -->
+
             <div id="resultado"></div>
 
-            <!-- CÓDIGO -->
+            <!-- =================================================
+                 CÓDIGO
+            ================================================== -->
+
             <div id="codigo"></div>
 
-            <!-- RECARGAR PÁGINA -->
+            <!-- =================================================
+                 RECARGAR PÁGINA
+            ================================================== -->
+
             <button
                 id="nuevoCodigo"
                 onclick="solicitarNuevoCodigo()"
@@ -359,6 +531,7 @@
         // ========================================================
 
         function ocultarDominio(correo) {
+
             if (!correo || !correo.includes("@")) {
                 return correo;
             }
@@ -370,7 +543,10 @@
             const posicionPunto = dominio.lastIndexOf(".");
 
             if (posicionPunto > 0) {
-                const extension = dominio.substring(posicionPunto);
+
+                const extension = dominio.substring(
+                    posicionPunto
+                );
 
                 return usuario + "@**************" + extension;
             }
@@ -415,13 +591,17 @@
             infoCuenta.style.display = "none";
 
             if (!nombre || !pin) {
+
                 resultado.textContent =
                     "❌ Completa ambos campos.";
+
                 return;
             }
 
             boton.disabled = true;
-            resultado.textContent = "⏳ Verificando...";
+
+            resultado.textContent =
+                "⏳ Verificando...";
 
             try {
 
@@ -445,8 +625,10 @@
                         "✅ Perfil verificado";
 
                     if (datos.correo) {
+
                         infoCuenta.textContent =
-                            "📧 Cuenta: " + ocultarDominio(datos.correo);
+                            "📧 Cuenta: "
+                            + ocultarDominio(datos.correo);
 
                         infoCuenta.style.display = "block";
                     }
@@ -499,6 +681,7 @@
                 document.getElementById("codigo");
 
             boton.disabled = true;
+
             nuevoCodigo.style.display = "none";
             codigo.style.display = "none";
 
@@ -555,7 +738,9 @@
         // ========================================================
 
         function solicitarNuevoCodigo() {
+
             window.location.reload();
+
         }
 
     </script>
