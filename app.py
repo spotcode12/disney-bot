@@ -1,128 +1,96 @@
-        "nombre",
-        ""
-    ).strip()
-
-    pin = datos.get(
-        "pin",
-        ""
-    ).strip()
-
-    if not nombre or not pin:
-
-        return jsonify({
-            "ok": False,
-            "mensaje": "Nombre y PIN son obligatorios."
-        }), 400
-
-    actualizado = editar_perfil(
-        perfil_id,
-        nombre,
-        pin
-    )
-
-    if not actualizado:
-
-        return jsonify({
-            "ok": False,
-            "mensaje": "Perfil no encontrado."
-        }), 404
-
-    return jsonify({
-        "ok": True,
-        "mensaje": "Perfil actualizado."
-    })
-
-
-# =========================================================
-# ACTIVAR / DESACTIVAR PERFIL
-# =========================================================
-
-@app.route(
-    "/admin/perfil/<int:perfil_id>/estado",
-    methods=["POST"]
+from flask import (
+    Flask,
+    render_template,
+    jsonify,
+    request,
+    session,
+    redirect,
+    url_for
 )
-@admin_required
-def admin_estado_perfil(perfil_id):
 
-    datos = request.get_json(
-        silent=True
-    )
+from functools import wraps
+import os
 
-    if not datos:
-
-        return jsonify({
-            "ok": False,
-            "mensaje": "No se recibieron datos."
-        }), 400
-
-    activo = datos.get(
-        "activo"
-    )
-
-    if activo not in [0, 1]:
-
-        return jsonify({
-            "ok": False,
-            "mensaje": "Estado inválido."
-        }), 400
-
-    actualizado = cambiar_estado_perfil(
-        perfil_id,
-        activo
-    )
-
-    if not actualizado:
-
-        return jsonify({
-            "ok": False,
-            "mensaje": "Perfil no encontrado."
-        }), 404
-
-    return jsonify({
-        "ok": True,
-        "mensaje": "Estado actualizado."
-    })
-
-
-# =========================================================
-# ELIMINAR PERFIL
-# =========================================================
-
-@app.route(
-    "/admin/perfil/<int:perfil_id>/eliminar",
-    methods=["POST"]
+from database import (
+    crear_tablas,
+    verificar_perfil,
+    obtener_cuentas,
+    obtener_cuenta,
+    obtener_perfiles,
+    agregar_cuenta,
+    editar_cuenta,
+    eliminar_cuenta,
+    agregar_perfil,
+    editar_perfil,
+    cambiar_estado_perfil,
+    eliminar_perfil,
+    obtener_estado_solicitudes,
+    registrar_solicitud
 )
-@admin_required
-def admin_eliminar_perfil(perfil_id):
 
-    eliminado = eliminar_perfil(
-        perfil_id
-    )
+from disney_mail import obtener_codigo_disney
 
-    if not eliminado:
 
-        return jsonify({
-            "ok": False,
-            "mensaje": "Perfil no encontrado."
-        }), 404
-
-    return jsonify({
-        "ok": True,
-        "mensaje": "Perfil eliminado."
-    })
+app = Flask(__name__)
 
 
 # =========================================================
-# INICIAR SERVIDOR
+# CONFIGURACIÓN
 # =========================================================
 
-if __name__ == "__main__":
+app.secret_key = os.getenv(
+    "FLASK_SECRET_KEY",
+    "CAMBIA-ESTA-CLAVE"
+)
 
-    print()
-    print("========================================")
-    print("🎬 DISNEY+ ADMIN")
-    print("========================================")
-    print("🌐 http://127.0.0.1:5000")
-    print("🔐 Admin: http://127.0.0.1:5000/admin")
-    print("========================================")
-    print()
+crear_tablas()
+
+
+# =========================================================
+# CREDENCIALES DEL ADMIN
+# =========================================================
+
+ADMIN_USER = os.getenv(
+    "ADMIN_USER",
+    "admin"
+)
+
+ADMIN_PASSWORD = os.getenv(
+    "ADMIN_PASSWORD",
+    "CAMBIA-ESTA-CONTRASEÑA"
+)
+
+
+# =========================================================
+# DECORADOR DE SEGURIDAD DEL ADMIN
+# =========================================================
+
+def admin_required(func):
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        if not session.get("admin_logged_in"):
+
+            return redirect(
+                url_for("admin_login")
+            )
+
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+# =========================================================
+# OCULTAR DOMINIO DEL CORREO
+#
+# Ejemplo:
+# tifycuen@streamservice2.space
+# tifycuen@**************.space
+# =========================================================
+
+def ocultar_dominio(correo):
+
+    if not correo or "@" not in correo:
+
+        return correo
